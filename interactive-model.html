@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniModel 3D | Interactive Science & Engineering Simulator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #07090e;
+      --bg-card: rgba(15, 23, 42, 0.85);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --border-accent: rgba(56, 189, 248, 0.35);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #38bdf8;
+      --accent-purple: #c084fc;
+      --accent-emerald: #34d399;
+      --accent-amber: #fbbf24;
+      --accent-rose: #fb7185;
+      --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header & Navigation Bar */
+    header {
+      background: rgba(11, 15, 25, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0284c7, #9333ea);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+    }
+
+    .brand-title h1 {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(to right, #fff, var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Concept switcher buttons */
+    .concept-nav {
+      display: flex;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .concept-btn {
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .concept-btn.active {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: white;
+      box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      text-decoration: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--border-accent);
+    }
+
+    /* Main Viewport Container */
+    .viewport-container {
+      position: relative;
+      flex: 1;
+      min-height: calc(100vh - 120px);
+      width: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .model-view {
+      position: absolute;
+      inset: 0;
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+
+    .model-view.active {
+      display: block;
+    }
+
+    /* Canvas Elements */
+    #solarCanvasContainer {
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    #solarCanvasContainer:active {
+      cursor: grabbing;
+    }
+
+    #circuitCanvas, #heartCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Floating HUD Panels & Controls */
+    .hud-panel {
+      position: absolute;
+      background: var(--bg-card);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px 18px;
+      z-index: 10;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      pointer-events: auto;
+    }
+
+    /* Solar System HUD */
+    .hud-controls-bottom {
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .hud-info-right {
+      top: 24px;
+      right: 24px;
+      width: 320px;
+      max-height: calc(100% - 140px);
+      overflow-y: auto;
+    }
+
+    @media (max-width: 768px) {
+      .hud-info-right {
+        top: auto;
+        bottom: 90px;
+        right: 12px;
+        left: 12px;
+        width: auto;
+        max-height: 200px;
+      }
+      .hud-controls-bottom {
+        bottom: 12px;
+        width: 95%;
+      }
+    }
+
+    .hud-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .badge-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid var(--border-accent);
+    }
+
+    .hud-spec-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 12px;
+    }
+
+    .hud-spec-label {
+      color: var(--text-muted);
+    }
+
+    .hud-spec-val {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .mission-highlight-card {
+      margin-top: 12px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .mission-highlight-card h4 {
+      font-size: 12px;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .mission-highlight-card p {
+      font-size: 11px;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+
+    /* Slider styling */
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    input[type=range] {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+    }
+
+    .select-dropdown {
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      outline: none;
+    }
+
+    /* Circuit HUD styles */
+    .circuit-hud-panel {
+      top: 24px;
+      left: 24px;
+      width: 320px;
+    }
+
+    .meter-display {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      text-align: center;
+    }
+
+    .meter-box {
+      padding: 4px;
+    }
+
+    .meter-val {
+      font-size: 20px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .meter-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* Heart HUD styles */
+    .heart-hud-panel {
+      top: 24px;
+      left: 24px;
+      width: 320px;
+    }
+
+    .heart-pulse-indicator {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 12px 0;
+    }
+
+    .pulse-dot {
+      width: 14px;
+      height: 14px;
+      background: var(--accent-rose);
+      border-radius: 50%;
+      animation: heartbeatAnim 1s infinite;
+    }
+
+    @keyframes heartbeatAnim {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(251, 113, 133, 0.6); }
+      30% { transform: scale(1.4); box-shadow: 0 0 15px rgba(251, 113, 133, 0.9); }
+      60% { transform: scale(1); box-shadow: 0 0 0 rgba(251, 113, 133, 0); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🔬</div>
+      <div class="brand-title">
+        <h1>OmniModel 3D Simulator</h1>
+        <p>Interactive 2D & 3D Concepts: Solar System • Electric Circuit • Human Heart</p>
+      </div>
+    </div>
+
+    <!-- Switch Concept Tabs -->
+    <div class="concept-nav">
+      <button class="concept-btn active" onclick="switchConcept('solar')">
+        <span>🪐</span> <span>Solar System (3D)</span>
+      </button>
+      <button class="concept-btn" onclick="switchConcept('circuit')">
+        <span>⚡</span> <span>Circuit (2D Physics)</span>
+      </button>
+      <button class="concept-btn" onclick="switchConcept('heart')">
+        <span>🫀</span> <span>Cardiac Cycle (2D/3D)</span>
+      </button>
+    </div>
+
+    <div class="header-actions">
+      <a href="index.html" class="btn">← Back to Hub</a>
+      <button class="btn" onclick="resetCurrentView()">🔄 Reset View</button>
+    </div>
+  </header>
+
+  <!-- Viewport Area -->
+  <div class="viewport-container">
+
+    <!-- =========================================================================
+         VIEW 1: 3D SOLAR SYSTEM (Three.js)
+         ========================================================================= -->
+    <div class="model-view active" id="view-solar">
+      <div id="solarCanvasContainer"></div>
+
+      <!-- Right Telemetry Panel -->
+      <div class="hud-panel hud-info-right" id="solarInfoPanel">
+        <div class="hud-title">
+          <span id="targetPlanetName">Earth (Prithvi)</span>
+          <span class="badge-pill" id="targetPlanetType">Terrestrial Planet</span>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;" id="targetPlanetDesc">
+          Our home planet, the only known celestial body in the universe confirmed to harbor life and surface liquid water oceans.
+        </p>
+
+        <div class="hud-spec-row">
+          <span class="hud-spec-label">Diameter</span>
+          <span class="hud-spec-val" id="specDiameter">12,742 km</span>
+        </div>
+        <div class="hud-spec-row">
+          <span class="hud-spec-label">Distance from Sun</span>
+          <span class="hud-spec-val" id="specDistance">149.6 Million km (1.0 AU)</span>
+        </div>
+        <div class="hud-spec-row">
+          <span class="hud-spec-label">Orbital Period</span>
+          <span class="hud-spec-val" id="specOrbit">365.25 Days</span>
+        </div>
+        <div class="hud-spec-row">
+          <span class="hud-spec-label">Rotational Day</span>
+          <span class="hud-spec-val" id="specRotation">23.9 Hours</span>
+        </div>
+        <div class="hud-spec-row">
+          <span class="hud-spec-label">Surface Gravity</span>
+          <span class="hud-spec-val" id="specGravity">9.81 m/s² (1.0g)</span>
+        </div>
+        <div class="hud-spec-row">
+          <span class="hud-spec-label">Known Moons</span>
+          <span class="hud-spec-val" id="specMoons">1 (The Moon)</span>
+        </div>
+
+        <!-- Space Exploration Mission Highlight -->
+        <div class="mission-highlight-card">
+          <h4>🚀 ISRO Space Heritage</h4>
+          <p id="targetMissionFact">
+            Chandrayaan-3 soft landed near the South Pole (Shiv Shakti Point) in Aug 2023. Aditya-L1 monitors solar flares from the Sun-Earth L1 Halo orbit.
+          </p>
+        </div>
+      </div>
+
+      <!-- Bottom Floating Controls -->
+      <div class="hud-panel hud-controls-bottom">
+        <div class="control-item">
+          <span>Target:</span>
+          <select class="select-dropdown" id="planetSelector" onchange="focusPlanet(this.value)">
+            <option value="Sun">☀️ Sun</option>
+            <option value="Mercury">Mercury</option>
+            <option value="Venus">Venus</option>
+            <option value="Earth" selected>Earth & Moon</option>
+            <option value="Mars">Mars</option>
+            <option value="Jupiter">Jupiter</option>
+            <option value="Saturn">Saturn</option>
+            <option value="Uranus">Uranus</option>
+            <option value="Neptune">Neptune</option>
+          </select>
+        </div>
+
+        <div class="control-item">
+          <button class="btn" id="btnPauseOrbit" onclick="toggleSolarPlayPause()">⏸ Pause</button>
+        </div>
+
+        <div class="control-item">
+          <span>Speed:</span>
+          <input type="range" id="solarSpeedRange" min="0" max="5" step="0.1" value="1" oninput="updateSolarSpeed(this.value)">
+          <span id="speedValLabel">1.0x</span>
+        </div>
+
+        <div class="control-item">
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+            <input type="checkbox" id="chkShowOrbits" checked onchange="toggleOrbitLines(this.checked)">
+            <span>Orbit Lines</span>
+          </label>
+        </div>
+
+        <div class="control-item" style="color: var(--text-muted); font-size: 11px;">
+          <span>🖱️ Drag to Rotate • Scroll to Zoom</span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- =========================================================================
+         VIEW 2: 2D INTERACTIVE ELECTRIC CIRCUIT (Physics Canvas)
+         ========================================================================= -->
+    <div class="model-view" id="view-circuit">
+      <canvas id="circuitCanvas"></canvas>
+
+      <div class="hud-panel circuit-hud-panel">
+        <div class="hud-title">
+          <span>⚡ DC Circuit Lab</span>
+          <span class="badge-pill" id="circuitStatusBadge" style="background: rgba(16,185,129,0.15); color: var(--accent-emerald);">Live Closed Circuit</span>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+          Interactive closed loop with battery, potentiometer resistor, switch, and LED emitter. Electrons dynamically flow through wires.
+        </p>
+
+        <!-- Digital Multimeter Output -->
+        <div class="meter-display">
+          <div class="meter-box">
+            <div class="meter-val" style="color: var(--accent-cyan);" id="meterVoltage">12.0 V</div>
+            <div class="meter-lbl">Supply Voltage (V)</div>
+          </div>
+          <div class="meter-box">
+            <div class="meter-val" style="color: var(--accent-emerald);" id="meterCurrent">120.0 mA</div>
+            <div class="meter-lbl">Current (I = V/R)</div>
+          </div>
+          <div class="meter-box">
+            <div class="meter-val" style="color: var(--accent-amber);" id="meterResistance">100 Ω</div>
+            <div class="meter-lbl">Resistance (R)</div>
+          </div>
+          <div class="meter-box">
+            <div class="meter-val" style="color: var(--accent-rose);" id="meterPower">1.44 W</div>
+            <div class="meter-lbl">Power (P = V·I)</div>
+          </div>
+        </div>
+
+        <!-- Interactive Sliders -->
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 14px;">
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+              <span>Source Voltage (V):</span>
+              <strong id="labelV">12V</strong>
+            </div>
+            <input type="range" id="circuitVoltageSlider" min="1" max="24" value="12" style="width: 100%;" oninput="updateCircuitPhysics()">
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+              <span>Potentiometer Resistance (R):</span>
+              <strong id="labelR">100Ω</strong>
+            </div>
+            <input type="range" id="circuitResistanceSlider" min="20" max="500" value="100" style="width: 100%;" oninput="updateCircuitPhysics()">
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+            <span>Knife Switch:</span>
+            <button class="btn" id="btnToggleSwitch" onclick="toggleCircuitSwitch()" style="background: rgba(16,185,129,0.2); border-color: rgba(16,185,129,0.4);">
+              🟢 Switch Closed (ON)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- =========================================================================
+         VIEW 3: CARDIAC CYCLE & HUMAN HEART ANATOMY
+         ========================================================================= -->
+    <div class="model-view" id="view-heart">
+      <canvas id="heartCanvas"></canvas>
+
+      <div class="hud-panel heart-hud-panel">
+        <div class="hud-title">
+          <span>🫀 Human Cardiac Cycle</span>
+          <span class="badge-pill" id="heartPhaseBadge" style="background: rgba(251,113,133,0.2); color: var(--accent-rose);">Ventricular Systole</span>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+          Pulsing 4-chamber anatomical pump showing coordinated deoxygenated (blue) and oxygenated (red) hemodynamics.
+        </p>
+
+        <div class="heart-pulse-indicator">
+          <div class="pulse-dot" id="heartPulseDot"></div>
+          <div>
+            <div style="font-size: 22px; font-weight: 700; color: var(--accent-rose);"><span id="bpmDisplay">72</span> BPM</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Normal Resting Sinus Rhythm</div>
+          </div>
+        </div>
+
+        <div style="margin: 14px 0;">
+          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+            <span>Heart Rate Pace:</span>
+            <span id="bpmSliderVal">72 BPM</span>
+          </div>
+          <input type="range" id="heartBpmSlider" min="40" max="180" value="72" style="width: 100%;" oninput="updateHeartRate(this.value)">
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:2px;">
+            <span>40 (Athletic/Bradycardia)</span>
+            <span>72 (Rest)</span>
+            <span>180 (Peak Sprint)</span>
+          </div>
+        </div>
+
+        <div class="hud-spec-row">
+          <span class="hud-spec-label">Right Atrium & Ventricle</span>
+          <span class="hud-spec-val" style="color: #60a5fa;">Deoxygenated (To Lungs)</span>
+        </div>
+        <div class="hud-spec-row">
+          <span class="hud-spec-label">Left Atrium & Ventricle</span>
+          <span class="hud-spec-val" style="color: #f87171;">Oxygenated (To Body)</span>
+        </div>
+        <div class="hud-spec-row">
+          <span class="hud-spec-label">Cardiac Output</span>
+          <span class="hud-spec-val" id="specCardiacOutput">5.04 Liters/min</span>
+        </div>
+
+        <div style="margin-top: 14px; display: flex; gap: 8px;">
+          <button class="btn btn-sm" id="btnSoundHeartbeat" onclick="toggleHeartSound()">🔊 Sound: Off</button>
+          <button class="btn btn-sm" onclick="setPresetBpm(60)">Rest (60)</button>
+          <button class="btn btn-sm" onclick="setPresetBpm(130)">Running (130)</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* =========================================================================
+       1. GLOBAL NAVIGATION & CONCEPT ROUTER
+       ========================================================================= */
+    let currentConcept = 'solar';
+
+    function switchConcept(concept) {
+      currentConcept = concept;
+      document.querySelectorAll('.concept-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.model-view').forEach(view => view.classList.remove('active'));
+
+      if (concept === 'solar') {
+        document.querySelector('.concept-btn:nth-child(1)').classList.add('active');
+        document.getElementById('view-solar').classList.add('active');
+        onWindowResize();
+      } else if (concept === 'circuit') {
+        document.querySelector('.concept-btn:nth-child(2)').classList.add('active');
+        document.getElementById('view-circuit').classList.add('active');
+        resizeCircuitCanvas();
+      } else if (concept === 'heart') {
+        document.querySelector('.concept-btn:nth-child(3)').classList.add('active');
+        document.getElementById('view-heart').classList.add('active');
+        resizeHeartCanvas();
+      }
+    }
+
+    function resetCurrentView() {
+      if (currentConcept === 'solar') {
+        focusPlanet('Sun');
+        camera.position.set(0, 70, 160);
+        controlsState.targetX = 0;
+        controlsState.targetY = 0;
+        controlsState.targetZ = 0;
+      } else if (currentConcept === 'circuit') {
+        document.getElementById('circuitVoltageSlider').value = 12;
+        document.getElementById('circuitResistanceSlider').value = 100;
+        isCircuitSwitchClosed = true;
+        document.getElementById('btnToggleSwitch').innerHTML = "🟢 Switch Closed (ON)";
+        document.getElementById('btnToggleSwitch').style.background = "rgba(16,185,129,0.2)";
+        updateCircuitPhysics();
+      } else if (currentConcept === 'heart') {
+        setPresetBpm(72);
+      }
+    }
+
+    /* =========================================================================
+       2. THREE.JS 3D SOLAR SYSTEM SIMULATOR
+       ========================================================================= */
+    const PLANET_DATA = {
+      Sun: {
+        radius: 7.0, color: 0xffaa00, dist: 0, speed: 0,
+        type: "Yellow Dwarf Star (G2V)",
+        desc: "The central gravitational anchor of our solar system, fusing 600 million tons of hydrogen into helium every second in its core.",
+        diameter: "1,392,700 km (109 Earths)",
+        distance: "0 km (Center)",
+        orbit: "N/A",
+        rotation: "25 - 35 Earth Days",
+        gravity: "274 m/s² (28g)",
+        moons: "8 planets, 5 dwarf planets",
+        mission: "ISRO Aditya-L1 spacecraft is actively studying the solar corona, coronal mass ejections (CMEs) and solar wind from the Sun-Earth L1 Lagrange halo orbit."
+      },
+      Mercury: {
+        radius: 0.9, color: 0xa8a29e, dist: 14, speed: 0.04,
+        type: "Terrestrial Planet",
+        desc: "The smallest planet and closest to the Sun, with extreme surface temperature swings from 430°C by day to -180°C by night.",
+        diameter: "4,879 km",
+        distance: "57.9 Million km (0.39 AU)",
+        orbit: "88 Earth Days",
+        rotation: "58.6 Earth Days",
+        gravity: "3.7 m/s² (0.38g)",
+        moons: "0",
+        mission: "Challenging orbital insertion due to the Sun's deep gravity well; targeted by MESSENGER and BepiColombo."
+      },
+      Venus: {
+        radius: 1.8, color: 0xeab308, dist: 22, speed: 0.015,
+        type: "Terrestrial Planet",
+        desc: "Earth's 'twin' in size, but enveloped in a runaway greenhouse atmosphere of CO2 with clouds of sulfuric acid and 465°C surface heat.",
+        diameter: "12,104 km",
+        distance: "108.2 Million km (0.72 AU)",
+        orbit: "224.7 Earth Days",
+        rotation: "243 Earth Days (Retrograde)",
+        gravity: "8.87 m/s² (0.9g)",
+        moons: "0",
+        mission: "ISRO Shukrayaan orbiter mission is designed to penetrate the dense cloud deck with Synthetic Aperture Radar (SAR) to map geological volcanic activity."
+      },
+      Earth: {
+        radius: 2.0, color: 0x38bdf8, dist: 32, speed: 0.01,
+        type: "Terrestrial Planet",
+        desc: "The blue marble, perfectly positioned inside the habitable circumstellar Goldilocks zone with a protective geomagnetic shield.",
+        diameter: "12,742 km",
+        distance: "149.6 Million km (1.0 AU)",
+        orbit: "365.25 Days",
+        rotation: "23.9 Hours",
+        gravity: "9.81 m/s² (1.0g)",
+        moons: "1 (The Moon)",
+        mission: "Home to ISRO's Satish Dhawan Space Centre (SDSC SHAR) at Sriharikota, launching PSLV, GSLV, and LVM3 orbital missions."
+      },
+      Mars: {
+        radius: 1.2, color: 0xf97316, dist: 42, speed: 0.008,
+        type: "Terrestrial Planet",
+        desc: "The Red Planet, tinted by oxidized iron dust. Features Olympus Mons, the tallest volcano in the solar system, and ancient dried riverbeds.",
+        diameter: "6,779 km",
+        distance: "227.9 Million km (1.52 AU)",
+        orbit: "687 Earth Days",
+        rotation: "24.6 Hours",
+        gravity: "3.72 m/s² (0.38g)",
+        moons: "2 (Phobos & Deimos)",
+        mission: "ISRO's Mars Orbiter Mission (Mangalyaan / MOM) made India the first nation to reach Martian orbit on its historic maiden attempt in September 2014."
+      },
+      Jupiter: {
+        radius: 4.5, color: 0xfbbf24, dist: 58, speed: 0.002,
+        type: "Gas Giant",
+        desc: "The colossal king of planets with a mass 2.5 times all other planets combined. Houses the iconic Great Red Spot cyclonic storm.",
+        diameter: "139,820 km (11 Earths)",
+        distance: "778.5 Million km (5.2 AU)",
+        orbit: "11.86 Earth Years",
+        rotation: "9.9 Hours",
+        gravity: "24.79 m/s² (2.5g)",
+        moons: "95 (Io, Europa, Ganymede, Callisto)",
+        mission: "Acts as a gravitational shield sweeping up incoming comets; explored by NASA Galileo, Juno and ESA JUICE."
+      },
+      Saturn: {
+        radius: 3.8, color: 0xfde047, dist: 74, speed: 0.0009,
+        type: "Gas Giant with Rings",
+        desc: "Famous for its magnificent ring system made of billions of particles of water ice and rock orbiting within the Roche limit.",
+        diameter: "116,460 km",
+        distance: "1.43 Billion km (9.58 AU)",
+        orbit: "29.45 Earth Years",
+        rotation: "10.7 Hours",
+        gravity: "10.44 m/s² (1.06g)",
+        moons: "146 (Titan, Enceladus)",
+        mission: "Enceladus has subsurface oceans erupting geysers into space, making it a primary candidate for astrobiological discovery."
+      },
+      Uranus: {
+        radius: 2.6, color: 0x67e8f9, dist: 88, speed: 0.0004,
+        type: "Ice Giant",
+        desc: "An icy blue-green giant tilted 98 degrees on its rotational side, effectively rolling around the Sun like a ball.",
+        diameter: "50,724 km",
+        distance: "2.87 Billion km (19.2 AU)",
+        orbit: "84 Earth Years",
+        rotation: "17.2 Hours (Retrograde)",
+        gravity: "8.69 m/s² (0.88g)",
+        moons: "28 (Titania, Oberon, Miranda)",
+        mission: "Coldest planetary atmosphere in the Solar System, dipping down to -224°C."
+      },
+      Neptune: {
+        radius: 2.5, color: 0x3b82f6, dist: 102, speed: 0.0001,
+        type: "Ice Giant",
+        desc: "The outermost major planet, wracked by supersonic winds exceeding 2,100 km/h in an atmosphere of hydrogen, helium and methane.",
+        diameter: "49,244 km",
+        distance: "4.5 Billion km (30.1 AU)",
+        orbit: "164.8 Earth Years",
+        rotation: "16.1 Hours",
+        gravity: "11.15 m/s² (1.14g)",
+        moons: "16 (Triton)",
+        mission: "Triton orbits retrograde and features active nitrogen geysers, discovered by Voyager 2."
+      }
+    };
+
+    let scene, camera, renderer;
+    let planetMeshes = {};
+    let orbitLines = [];
+    let solarSpeed = 1.0;
+    let solarPlaying = true;
+    let targetPlanet = 'Earth';
+
+    // Mouse Controls state
+    const controlsState = {
+      isDragging: false,
+      prevMouseX: 0,
+      prevMouseY: 0,
+      theta: 0,
+      phi: Math.PI / 4,
+      radius: 170,
+      targetX: 0,
+      targetY: 0,
+      targetZ: 0
+    };
+
+    function initSolarSystem() {
+      const container = document.getElementById('solarCanvasContainer');
+      const width = container.clientWidth || window.innerWidth;
+      const height = container.clientHeight || (window.innerHeight - 80);
+
+      // Scene
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x07090e, 0.0012);
+
+      // Camera
+      camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
+      updateCameraPos();
+
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0x334155, 1.2);
+      scene.add(ambientLight);
+
+      const sunLight = new THREE.PointLight(0xffffff, 2.5, 400);
+      sunLight.position.set(0, 0, 0);
+      scene.add(sunLight);
+
+      // Starfield Background
+      const starGeometry = new THREE.BufferGeometry();
+      const starCount = 2000;
+      const starPositions = new Float32Array(starCount * 3);
+      for (let i = 0; i < starCount * 3; i += 3) {
+        starPositions[i] = (Math.random() - 0.5) * 1200;
+        starPositions[i + 1] = (Math.random() - 0.5) * 1200;
+        starPositions[i + 2] = (Math.random() - 0.5) * 1200;
+      }
+      starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 1.2, transparent: true, opacity: 0.8 });
+      const starField = new THREE.Points(starGeometry, starMaterial);
+      scene.add(starField);
+
+      // Build Sun & Planets
+      Object.entries(PLANET_DATA).forEach(([name, data]) => {
+        let geometry = new THREE.SphereGeometry(data.radius, 32, 32);
+        let material;
+
+        if (name === 'Sun') {
+          material = new THREE.MeshBasicMaterial({ color: 0xffbb00 });
+          // Sun glow corona mesh
+          const glowGeo = new THREE.SphereGeometry(data.radius * 1.25, 32, 32);
+          const glowMat = new THREE.MeshBasicMaterial({ color: 0xff7700, transparent: true, opacity: 0.25, side: THREE.BackSide });
+          const glowMesh = new THREE.Mesh(glowGeo, glowMat);
+          scene.add(glowMesh);
+        } else {
+          material = new THREE.MeshStandardMaterial({
+            color: data.color,
+            roughness: 0.8,
+            metalness: 0.1
+          });
+        }
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.userData = {
+          name: name,
+          dist: data.dist,
+          speed: data.speed,
+          angle: Math.random() * Math.PI * 2
+        };
+
+        if (name === 'Saturn') {
+          // Add Saturn 3D Rings
+          const ringGeo = new THREE.RingGeometry(data.radius * 1.4, data.radius * 2.3, 32);
+          const ringMat = new THREE.MeshBasicMaterial({ color: 0xd4b152, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
+          const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+          ringMesh.rotation.x = Math.PI / 2.3;
+          mesh.add(ringMesh);
+        }
+
+        if (name === 'Earth') {
+          // Add Earth Moon
+          const moonGeo = new THREE.SphereGeometry(0.5, 16, 16);
+          const moonMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db });
+          const moonMesh = new THREE.Mesh(moonGeo, moonMat);
+          moonMesh.position.set(3.5, 0, 0);
+          mesh.add(moonMesh);
+          mesh.userData.moon = moonMesh;
+        }
+
+        planetMeshes[name] = mesh;
+        scene.add(mesh);
+
+        // Orbit Lines
+        if (data.dist > 0) {
+          const orbitCurve = new THREE.EllipseCurve(
+            0, 0,
+            data.dist, data.dist,
+            0, 2 * Math.PI,
+            false,
+            0
+          );
+          const points = orbitCurve.getPoints(100);
+          const orbitGeo = new THREE.BufferGeometry().setFromPoints(
+            points.map(p => new THREE.Vector3(p.x, 0, p.y))
+          );
+          const orbitMat = new THREE.LineBasicMaterial({
+            color: 0x38bdf8,
+            transparent: true,
+            opacity: 0.18
+          });
+          const orbitLine = new THREE.Line(orbitGeo, orbitMat);
+          orbitLines.push(orbitLine);
+          scene.add(orbitLine);
+        }
+      });
+
+      // Mouse drag controls
+      container.addEventListener('mousedown', (e) => {
+        controlsState.isDragging = true;
+        controlsState.prevMouseX = e.clientX;
+        controlsState.prevMouseY = e.clientY;
+      });
+
+      window.addEventListener('mouseup', () => controlsState.isDragging = false);
+
+      window.addEventListener('mousemove', (e) => {
+        if (!controlsState.isDragging) return;
+        const deltaX = e.clientX - controlsState.prevMouseX;
+        const deltaY = e.clientY - controlsState.prevMouseY;
+
+        controlsState.theta -= deltaX * 0.006;
+        controlsState.phi = Math.max(0.1, Math.min(Math.PI / 2.05, controlsState.phi - deltaY * 0.006));
+
+        controlsState.prevMouseX = e.clientX;
+        controlsState.prevMouseY = e.clientY;
+        updateCameraPos();
+      });
+
+      // Wheel Zoom
+      container.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        controlsState.radius = Math.max(25, Math.min(450, controlsState.radius + e.deltaY * 0.25));
+        updateCameraPos();
+      }, { passive: false });
+
+      // Window resize
+      window.addEventListener('resize', onWindowResize);
+
+      // Start loop
+      animateSolarSystem();
+      focusPlanet('Earth');
+    }
+
+    function updateCameraPos() {
+      if (!camera) return;
+      camera.position.x = controlsState.targetX + controlsState.radius * Math.sin(controlsState.phi) * Math.sin(controlsState.theta);
+      camera.position.y = controlsState.targetY + controlsState.radius * Math.cos(controlsState.phi);
+      camera.position.z = controlsState.targetZ + controlsState.radius * Math.sin(controlsState.phi) * Math.cos(controlsState.theta);
+      camera.lookAt(controlsState.targetX, controlsState.targetY, controlsState.targetZ);
+    }
+
+    function onWindowResize() {
+      const container = document.getElementById('solarCanvasContainer');
+      if (!renderer || !camera || !container) return;
+      const width = container.clientWidth || window.innerWidth;
+      const height = container.clientHeight || (window.innerHeight - 80);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    }
+
+    function animateSolarSystem() {
+      requestAnimationFrame(animateSolarSystem);
+
+      if (currentConcept !== 'solar') return;
+
+      // Rotate Sun
+      if (planetMeshes.Sun) {
+        planetMeshes.Sun.rotation.y += 0.002;
+      }
+
+      // Orbit planets
+      Object.entries(planetMeshes).forEach(([name, mesh]) => {
+        if (name === 'Sun') return;
+
+        if (solarPlaying) {
+          mesh.userData.angle += mesh.userData.speed * solarSpeed * 0.5;
+          mesh.position.x = Math.cos(mesh.userData.angle) * mesh.userData.dist;
+          mesh.position.z = Math.sin(mesh.userData.angle) * mesh.userData.dist;
+          mesh.rotation.y += 0.02;
+
+          if (mesh.userData.moon) {
+            mesh.userData.moon.rotation.y += 0.05;
+          }
+        }
+      });
+
+      // Smooth camera follow target planet
+      if (targetPlanet && planetMeshes[targetPlanet]) {
+        const p = planetMeshes[targetPlanet];
+        controlsState.targetX += (p.position.x - controlsState.targetX) * 0.05;
+        controlsState.targetY += (p.position.y - controlsState.targetY) * 0.05;
+        controlsState.targetZ += (p.position.z - controlsState.targetZ) * 0.05;
+        updateCameraPos();
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    function focusPlanet(name) {
+      targetPlanet = name;
+      document.getElementById('planetSelector').value = name;
+      const data = PLANET_DATA[name];
+      if (!data) return;
+
+      // Update HUD
+      document.getElementById('targetPlanetName').innerText = name;
+      document.getElementById('targetPlanetType').innerText = data.type;
+      document.getElementById('targetPlanetDesc').innerText = data.desc;
+      document.getElementById('specDiameter').innerText = data.diameter;
+      document.getElementById('specDistance').innerText = data.distance;
+      document.getElementById('specOrbit').innerText = data.orbit;
+      document.getElementById('specRotation').innerText = data.rotation;
+      document.getElementById('specGravity').innerText = data.gravity;
+      document.getElementById('specMoons').innerText = data.moons;
+      document.getElementById('targetMissionFact').innerText = data.mission;
+
+      // Adjust camera distance nicely
+      if (name === 'Sun') {
+        controlsState.radius = 120;
+      } else {
+        controlsState.radius = Math.max(22, data.radius * 7.5);
+      }
+    }
+
+    function toggleSolarPlayPause() {
+      solarPlaying = !solarPlaying;
+      document.getElementById('btnPauseOrbit').innerText = solarPlaying ? "⏸ Pause" : "▶ Resume";
+    }
+
+    function updateSolarSpeed(val) {
+      solarSpeed = parseFloat(val);
+      document.getElementById('speedValLabel').innerText = `${solarSpeed.toFixed(1)}x`;
+    }
+
+    function toggleOrbitLines(visible) {
+      orbitLines.forEach(l => l.visible = visible);
+    }
+
+
+    /* =========================================================================
+       3. 2D INTERACTIVE ELECTRIC CIRCUIT LAB
+       ========================================================================= */
+    const circuitCanvas = document.getElementById('circuitCanvas');
+    const ctxCircuit = circuitCanvas.getContext('2d');
+    let isCircuitSwitchClosed = true;
+    let circuitElectrons = [];
+    let electronCount = 28;
+
+    function resizeCircuitCanvas() {
+      circuitCanvas.width = circuitCanvas.parentElement.clientWidth;
+      circuitCanvas.height = circuitCanvas.parentElement.clientHeight;
+      initElectrons();
+    }
+
+    function initElectrons() {
+      circuitElectrons = [];
+      for (let i = 0; i < electronCount; i++) {
+        circuitElectrons.push({ progress: i / electronCount });
+      }
+    }
+
+    function toggleCircuitSwitch() {
+      isCircuitSwitchClosed = !isCircuitSwitchClosed;
+      const btn = document.getElementById('btnToggleSwitch');
+      const badge = document.getElementById('circuitStatusBadge');
+
+      if (isCircuitSwitchClosed) {
+        btn.innerHTML = "🟢 Switch Closed (ON)";
+        btn.style.background = "rgba(16,185,129,0.2)";
+        btn.style.borderColor = "rgba(16,185,129,0.4)";
+        badge.innerHTML = "Live Closed Circuit";
+        badge.style.color = "var(--accent-emerald)";
+      } else {
+        btn.innerHTML = "🔴 Switch Open (OFF)";
+        btn.style.background = "rgba(244,63,94,0.2)";
+        btn.style.borderColor = "rgba(244,63,94,0.4)";
+        badge.innerHTML = "Circuit Broken";
+        badge.style.color = "var(--accent-rose)";
+      }
+      updateCircuitPhysics();
+    }
+
+    function updateCircuitPhysics() {
+      const v = parseFloat(document.getElementById('circuitVoltageSlider').value);
+      const r = parseFloat(document.getElementById('circuitResistanceSlider').value);
+
+      document.getElementById('labelV').innerText = `${v}V`;
+      document.getElementById('labelR').innerText = `${r}Ω`;
+
+      if (!isCircuitSwitchClosed) {
+        document.getElementById('meterVoltage').innerText = `${v.toFixed(1)} V`;
+        document.getElementById('meterCurrent').innerText = `0.0 mA`;
+        document.getElementById('meterResistance').innerText = `${r.toFixed(0)} Ω`;
+        document.getElementById('meterPower').innerText = `0.00 W`;
+        return;
+      }
+
+      // Ohm's Law: I = V / R
+      const currentAmps = v / r;
+      const currentMilliamps = currentAmps * 1000;
+      const powerWatts = v * currentAmps;
+
+      document.getElementById('meterVoltage').innerText = `${v.toFixed(1)} V`;
+      document.getElementById('meterCurrent').innerText = `${currentMilliamps.toFixed(1)} mA`;
+      document.getElementById('meterResistance').innerText = `${r.toFixed(0)} Ω`;
+      document.getElementById('meterPower').innerText = `${powerWatts.toFixed(2)} W`;
+    }
+
+    function drawCircuit() {
+      if (currentConcept !== 'circuit') {
+        requestAnimationFrame(drawCircuit);
+        return;
+      }
+
+      const w = circuitCanvas.width;
+      const h = circuitCanvas.height;
+      ctxCircuit.clearRect(0, 0, w, h);
+
+      // Define rectangular circuit loop coordinates
+      const padX = Math.max(60, w * 0.18);
+      const padY = Math.max(60, h * 0.18);
+      const left = padX;
+      const right = w - padX;
+      const top = padY;
+      const bottom = h - padY;
+
+      // Draw Main Circuit Wire Path
+      ctxCircuit.strokeStyle = "#334155";
+      ctxCircuit.lineWidth = 6;
+      ctxCircuit.lineCap = "round";
+      ctxCircuit.lineJoin = "round";
+      ctxCircuit.beginPath();
+      ctxCircuit.moveTo(left, top);
+      ctxCircuit.lineTo(right, top);
+      ctxCircuit.lineTo(right, bottom);
+      ctxCircuit.lineTo(left, bottom);
+      ctxCircuit.closePath();
+      ctxCircuit.stroke();
+
+      const v = parseFloat(document.getElementById('circuitVoltageSlider').value);
+      const r = parseFloat(document.getElementById('circuitResistanceSlider').value);
+      const currentAmps = isCircuitSwitchClosed ? (v / r) : 0;
+
+      // 1. Draw Battery on Left Branch
+      const midY = (top + bottom) / 2;
+      ctxCircuit.fillStyle = "#1e293b";
+      ctxCircuit.fillRect(left - 24, midY - 40, 48, 80);
+      ctxCircuit.strokeStyle = "#38bdf8";
+      ctxCircuit.lineWidth = 2;
+      ctxCircuit.strokeRect(left - 24, midY - 40, 48, 80);
+
+      // Battery terminals (+ / -)
+      ctxCircuit.fillStyle = "#38bdf8";
+      ctxCircuit.font = "bold 16px sans-serif";
+      ctxCircuit.fillText("+", left - 6, midY - 14);
+      ctxCircuit.fillStyle = "#94a3b8";
+      ctxCircuit.fillText("−", left - 6, midY + 24);
+      ctxCircuit.font = "12px sans-serif";
+      ctxCircuit.fillText(`${v}V DC`, left - 18, midY + 54);
+
+      // 2. Draw Resistor (Potentiometer) on Top Branch
+      const midX = (left + right) / 2;
+      ctxCircuit.fillStyle = "#1e293b";
+      ctxCircuit.fillRect(midX - 50, top - 18, 100, 36);
+      ctxCircuit.strokeStyle = "#f59e0b";
+      ctxCircuit.lineWidth = 2;
+      ctxCircuit.strokeRect(midX - 50, top - 18, 100, 36);
+
+      // Resistor Zigzag
+      ctxCircuit.strokeStyle = "#f59e0b";
+      ctxCircuit.lineWidth = 3;
+      ctxCircuit.beginPath();
+      ctxCircuit.moveTo(midX - 40, top);
+      ctxCircuit.lineTo(midX - 25, top - 8);
+      ctxCircuit.lineTo(midX - 10, top + 8);
+      ctxCircuit.lineTo(midX + 5, top - 8);
+      ctxCircuit.lineTo(midX + 20, top + 8);
+      ctxCircuit.lineTo(midX + 40, top);
+      ctxCircuit.stroke();
+      ctxCircuit.fillStyle = "#f59e0b";
+      ctxCircuit.font = "12px sans-serif";
+      ctxCircuit.fillText(`R = ${r}Ω`, midX - 20, top - 24);
+
+      // 3. Draw Knife Switch on Right Branch
+      const switchY = (top + bottom) / 2;
+      ctxCircuit.fillStyle = "#0f172a";
+      ctxCircuit.beginPath();
+      ctxCircuit.arc(right, switchY - 24, 7, 0, Math.PI * 2);
+      ctxCircuit.arc(right, switchY + 24, 7, 0, Math.PI * 2);
+      ctxCircuit.fill();
+      ctxCircuit.stroke();
+
+      ctxCircuit.strokeStyle = isCircuitSwitchClosed ? "#10b981" : "#f43f5e";
+      ctxCircuit.lineWidth = 5;
+      ctxCircuit.beginPath();
+      ctxCircuit.moveTo(right, switchY + 24);
+      if (isCircuitSwitchClosed) {
+        ctxCircuit.lineTo(right, switchY - 24);
+      } else {
+        ctxCircuit.lineTo(right + 34, switchY - 14); // Tilted open switch
+      }
+      ctxCircuit.stroke();
+
+      // 4. Draw Light Bulb (LED Emitter) on Bottom Branch
+      const bulbX = (left + right) / 2;
+      const bulbRadius = 26;
+
+      // Bulb glow
+      if (isCircuitSwitchClosed && currentAmps > 0) {
+        const glowRad = bulbRadius + Math.min(currentAmps * 350, 60);
+        const grad = ctxCircuit.createRadialGradient(bulbX, bottom, bulbRadius * 0.4, bulbX, bottom, glowRad);
+        grad.addColorStop(0, "rgba(254, 240, 138, 0.95)");
+        grad.addColorStop(0.5, "rgba(250, 204, 21, 0.4)");
+        grad.addColorStop(1, "rgba(250, 204, 21, 0)");
+        ctxCircuit.fillStyle = grad;
+        ctxCircuit.beginPath();
+        ctxCircuit.arc(bulbX, bottom, glowRad, 0, Math.PI * 2);
+        ctxCircuit.fill();
+      }
+
+      // Bulb glass circle
+      ctxCircuit.fillStyle = isCircuitSwitchClosed ? "#fef08a" : "#334155";
+      ctxCircuit.beginPath();
+      ctxCircuit.arc(bulbX, bottom, bulbRadius, 0, Math.PI * 2);
+      ctxCircuit.fill();
+      ctxCircuit.strokeStyle = "#cbd5e1";
+      ctxCircuit.lineWidth = 2;
+      ctxCircuit.stroke();
+
+      // Filament
+      ctxCircuit.strokeStyle = isCircuitSwitchClosed ? "#b45309" : "#64748b";
+      ctxCircuit.beginPath();
+      ctxCircuit.moveTo(bulbX - 10, bottom + 12);
+      ctxCircuit.lineTo(bulbX - 4, bottom - 10);
+      ctxCircuit.lineTo(bulbX + 4, bottom - 10);
+      ctxCircuit.lineTo(bulbX + 10, bottom + 12);
+      ctxCircuit.stroke();
+
+      // 5. Flowing Electrons (Particles)
+      if (isCircuitSwitchClosed && currentAmps > 0) {
+        const perimeter = 2 * (right - left) + 2 * (bottom - top);
+        const speed = Math.min(currentAmps * 1.8, 0.015);
+
+        circuitElectrons.forEach(el => {
+          el.progress = (el.progress + speed) % 1;
+          const distAlong = el.progress * perimeter;
+          let px, py;
+
+          const topLen = right - left;
+          const rightLen = bottom - top;
+          const botLen = right - left;
+
+          // Wire path traversal
+          if (distAlong < topLen) {
+            px = left + distAlong;
+            py = top;
+          } else if (distAlong < topLen + rightLen) {
+            px = right;
+            py = top + (distAlong - topLen);
+          } else if (distAlong < topLen + rightLen + botLen) {
+            px = right - (distAlong - topLen - rightLen);
+            py = bottom;
+          } else {
+            px = left;
+            py = bottom - (distAlong - topLen - rightLen - botLen);
+          }
+
+          // Draw electron particle
+          ctxCircuit.fillStyle = "#38bdf8";
+          ctxCircuit.shadowColor = "#38bdf8";
+          ctxCircuit.shadowBlur = 8;
+          ctxCircuit.beginPath();
+          ctxCircuit.arc(px, py, 4, 0, Math.PI * 2);
+          ctxCircuit.fill();
+          ctxCircuit.shadowBlur = 0;
+        });
+      }
+
+      requestAnimationFrame(drawCircuit);
+    }
+
+
+    /* =========================================================================
+       4. CARDIAC CYCLE & HUMAN HEART ANATOMICAL SIMULATOR
+       ========================================================================= */
+    const heartCanvas = document.getElementById('heartCanvas');
+    const ctxHeart = heartCanvas.getContext('2d');
+    let heartBpm = 72;
+    let heartTime = 0;
+    let soundHeartbeatEnabled = false;
+    let lastBeatSecond = 0;
+
+    function resizeHeartCanvas() {
+      heartCanvas.width = heartCanvas.parentElement.clientWidth;
+      heartCanvas.height = heartCanvas.parentElement.clientHeight;
+    }
+
+    function updateHeartRate(val) {
+      heartBpm = parseInt(val);
+      document.getElementById('bpmDisplay').innerText = heartBpm;
+      document.getElementById('bpmSliderVal').innerText = `${heartBpm} BPM`;
+      document.getElementById('heartBpmSlider').value = heartBpm;
+
+      const cardiacOutput = ((heartBpm * 70) / 1000).toFixed(2);
+      document.getElementById('specCardiacOutput').innerText = `${cardiacOutput} Liters/min`;
+    }
+
+    function setPresetBpm(val) {
+      updateHeartRate(val);
+    }
+
+    function toggleHeartSound() {
+      soundHeartbeatEnabled = !soundHeartbeatEnabled;
+      document.getElementById('btnSoundHeartbeat').innerText = 
+        soundHeartbeatEnabled ? "🔊 Sound: On" : "🔇 Sound: Off";
+    }
+
+    function playLubDub() {
+      if (!soundHeartbeatEnabled) return;
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // Lub (Low pitch thud)
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.frequency.setValueAtTime(65, audioCtx.currentTime);
+        gain1.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start();
+        osc1.stop(audioCtx.currentTime + 0.12);
+
+        // Dub (slightly higher pitch snap 150ms later)
+        setTimeout(() => {
+          const osc2 = audioCtx.createOscillator();
+          const gain2 = audioCtx.createGain();
+          osc2.frequency.setValueAtTime(95, audioCtx.currentTime);
+          gain2.gain.setValueAtTime(0.35, audioCtx.currentTime);
+          gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.14);
+          osc2.connect(gain2);
+          gain2.connect(audioCtx.destination);
+          osc2.start();
+          osc2.stop(audioCtx.currentTime + 0.14);
+        }, 150);
+      } catch(e) {}
+    }
+
+    function drawHeart() {
+      if (currentConcept !== 'heart') {
+        requestAnimationFrame(drawHeart);
+        return;
+      }
+
+      const w = heartCanvas.width;
+      const h = heartCanvas.height;
+      ctxHeart.clearRect(0, 0, w, h);
+
+      heartTime += (heartBpm / 60) * 0.05;
+      const phase = Math.sin(heartTime);
+
+      // Determine Systole vs Diastole
+      const isSystole = phase > 0.2;
+      document.getElementById('heartPhaseBadge').innerText = isSystole ? "Ventricular Systole (Ejection)" : "Ventricular Diastole (Filling)";
+      document.getElementById('heartPhaseBadge').style.color = isSystole ? "var(--accent-rose)" : "var(--accent-cyan)";
+
+      // Sound trigger
+      const currentBeat = Math.floor(heartTime / Math.PI);
+      if (currentBeat !== lastBeatSecond) {
+        lastBeatSecond = currentBeat;
+        playLubDub();
+      }
+
+      const cx = w / 2;
+      const cy = h / 2 - 20;
+      const scale = 1.0 + (isSystole ? 0.08 * phase : -0.04);
+
+      ctxHeart.save();
+      ctxHeart.translate(cx, cy);
+      ctxHeart.scale(scale, scale);
+
+      // 1. Draw Great Vessels (Aorta & Pulmonary Trunk)
+      // Aorta (Red)
+      ctxHeart.fillStyle = "#dc2626";
+      ctxHeart.beginPath();
+      ctxHeart.roundRect(-25, -140, 50, 80, [15, 15, 0, 0]);
+      ctxHeart.fill();
+      // Superior Vena Cava (Blue)
+      ctxHeart.fillStyle = "#2563eb";
+      ctxHeart.beginPath();
+      ctxHeart.roundRect(-80, -130, 40, 70, [10, 10, 0, 0]);
+      ctxHeart.fill();
+
+      // 2. Draw Heart Body Base (Pericardium / Myocardium)
+      ctxHeart.fillStyle = "#991b1b";
+      ctxHeart.beginPath();
+      ctxHeart.moveTo(0, 110);
+      ctxHeart.bezierCurveTo(-150, 30, -130, -80, -40, -80);
+      ctxHeart.bezierCurveTo(0, -80, 0, -40, 0, -40);
+      ctxHeart.bezierCurveTo(0, -40, 0, -80, 40, -80);
+      ctxHeart.bezierCurveTo(130, -80, 150, 30, 0, 110);
+      ctxHeart.fill();
+      ctxHeart.lineWidth = 4;
+      ctxHeart.strokeStyle = "#7f1d1d";
+      ctxHeart.stroke();
+
+      // 3. Draw 4 Chambers
+      // Right Atrium (Deoxygenated Blue - top left of view)
+      ctxHeart.fillStyle = "rgba(37, 99, 235, 0.75)";
+      ctxHeart.beginPath();
+      ctxHeart.ellipse(-50, -35, 34, 28, 0, 0, Math.PI * 2);
+      ctxHeart.fill();
+
+      // Right Ventricle (Deoxygenated Blue - bottom left)
+      ctxHeart.beginPath();
+      ctxHeart.ellipse(-40, 35, 36, 44, -0.2, 0, Math.PI * 2);
+      ctxHeart.fill();
+
+      // Left Atrium (Oxygenated Red - top right)
+      ctxHeart.fillStyle = "rgba(239, 68, 68, 0.8)";
+      ctxHeart.beginPath();
+      ctxHeart.ellipse(50, -35, 34, 28, 0, 0, Math.PI * 2);
+      ctxHeart.fill();
+
+      // Left Ventricle (Oxygenated Red - thick muscular wall bottom right)
+      ctxHeart.beginPath();
+      ctxHeart.ellipse(40, 40, 42, 50, 0.2, 0, Math.PI * 2);
+      ctxHeart.fill();
+
+      // Chamber Labels
+      ctxHeart.fillStyle = "#ffffff";
+      ctxHeart.font = "bold 11px sans-serif";
+      ctxHeart.textAlign = "center";
+      ctxHeart.fillText("RA", -50, -32);
+      ctxHeart.fillText("RV", -40, 38);
+      ctxHeart.fillText("LA", 50, -32);
+      ctxHeart.fillText("LV", 40, 44);
+
+      // Flow direction arrows
+      ctxHeart.fillStyle = "#93c5fd";
+      ctxHeart.fillText("↓ To Lungs", -40, 95);
+      ctxHeart.fillStyle = "#fca5a5";
+      ctxHeart.fillText("↑ To Body", 40, 95);
+
+      ctxHeart.restore();
+
+      requestAnimationFrame(drawHeart);
+    }
+
+    // Init & Start all simulators
+    window.onload = () => {
+      initSolarSystem();
+      resizeCircuitCanvas();
+      drawCircuit();
+      resizeHeartCanvas();
+      drawHeart();
+    };
+  </script>
+</body>
+</html>
+

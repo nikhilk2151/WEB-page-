@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NextDeck | Interactive Space Exploration Presentation</title>
+  <style>
+    :root {
+      --bg-primary: #070a13;
+      --bg-slide: #0d1322;
+      --bg-card: rgba(22, 32, 54, 0.75);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --border-accent: rgba(56, 189, 248, 0.35);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #38bdf8;
+      --accent-indigo: #818cf8;
+      --accent-emerald: #34d399;
+      --accent-amber: #fbbf24;
+      --accent-rose: #fb7185;
+      --font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Progress Bar */
+    .deck-progress-bar {
+      height: 4px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      position: relative;
+      z-index: 50;
+    }
+
+    .deck-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-indigo));
+      width: 10%;
+      transition: width 0.3s ease;
+    }
+
+    /* Header Nav */
+    header {
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(13, 19, 34, 0.9);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 40;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      font-size: 20px;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .deck-controls-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--border-accent);
+    }
+
+    .slide-counter-badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent-cyan);
+      border: 1px solid var(--border-accent);
+    }
+
+    /* Presentation Viewport */
+    .deck-stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      perspective: 1200px;
+    }
+
+    .slide-wrapper {
+      width: 100%;
+      max-width: 1080px;
+      height: 100%;
+      max-height: 640px;
+      background: var(--bg-slide);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 44px 52px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+      position: relative;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      animation: slideIn 0.35s ease forwards;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(129, 140, 248, 0.05) 0%, transparent 40%);
+    }
+
+    .slide-wrapper.active {
+      display: flex;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Slide Typography */
+    .slide-tag {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-cyan);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .slide-title {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -0.8px;
+    }
+
+    .slide-subtitle {
+      font-size: 18px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      max-width: 800px;
+    }
+
+    .slide-content-area {
+      flex: 1;
+      margin: 24px 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      transition: transform 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+    }
+
+    .feature-icon {
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+
+    .feature-card h4 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .feature-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* SLIDE 4: Interactive Live Chart Elements */
+    .chart-controls-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .chart-tab-btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .chart-tab-btn.active {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--accent-cyan);
+      color: white;
+    }
+
+    .live-chart-svg {
+      width: 100%;
+      height: 240px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    /* SLIDE 8: Interactive Live Quiz Elements */
+    .quiz-slide-box {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    .quiz-slide-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .quiz-opt-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      padding: 14px 18px;
+      border-radius: 10px;
+      color: white;
+      text-align: left;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+    }
+
+    .quiz-opt-btn:hover:not(:disabled) {
+      border-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .quiz-opt-btn.correct {
+      background: rgba(16, 185, 129, 0.25) !important;
+      border-color: var(--accent-emerald) !important;
+      color: #6ee7b7;
+    }
+
+    .quiz-opt-btn.wrong {
+      background: rgba(244, 63, 94, 0.25) !important;
+      border-color: var(--accent-rose) !important;
+      color: #fda4af;
+    }
+
+    /* Slide Bottom Bar */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 16px;
+    }
+
+    /* Bottom Presenter Navigation Bar */
+    footer.presenter-bar {
+      background: rgba(13, 19, 34, 0.95);
+      border-top: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 40;
+    }
+
+    .nav-arrow-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .keyboard-hints {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 12px;
+    }
+
+    .kbd {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      color: white;
+    }
+
+    /* Overview Modal (Grid of Slides) */
+    .overview-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 10, 19, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      padding: 40px;
+    }
+
+    .overview-modal.active {
+      display: flex;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      overflow-y: auto;
+      margin-top: 24px;
+      padding-right: 8px;
+    }
+
+    .overview-card {
+      background: var(--bg-slide);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .overview-card:hover, .overview-card.active {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Progress Bar -->
+  <div class="deck-progress-bar">
+    <div class="deck-progress-fill" id="progressBar"></div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <span class="brand-icon">🚀</span>
+      <span class="brand-title">NextDeck Presentation • Frontiers in Space Exploration</span>
+    </div>
+
+    <div class="deck-controls-top">
+      <span class="slide-counter-badge" id="slideCounter">Slide 1 of 10</span>
+      <button class="btn" onclick="toggleOverview()">📑 Slide Grid (O)</button>
+      <button class="btn" onclick="toggleFullscreen()">⛶ Fullscreen (F)</button>
+      <a href="index.html" class="btn">← Back to Hub</a>
+    </div>
+  </header>
+
+  <!-- Presentation Viewport -->
+  <main class="deck-stage">
+
+    <!-- SLIDE 1: Title Slide -->
+    <div class="slide-wrapper active" id="slide-1">
+      <div>
+        <div class="slide-tag">Mission Briefing • Keynote 2026</div>
+        <h1 class="slide-title">Beyond the Stratosphere:<br><span style="background: linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">The New Architecture of Space</span></h1>
+        <p class="slide-subtitle">A comprehensive exploration of next-generation launch systems, deep space payloads, and international lunar infrastructure.</p>
+      </div>
+
+      <div class="slide-content-area">
+        <div class="grid-3">
+          <div class="feature-card">
+            <div class="feature-icon">🛰️</div>
+            <h4>Mega Constellations</h4>
+            <p>NavIC, Earth Observation SAR networks, and optical inter-satellite laser communications.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🌕</div>
+            <h4>Lunar South Pole Base</h4>
+            <p>From Chandrayaan-3 soft-landing to permanent in-situ resource extraction and habitats.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">👨‍🚀</div>
+            <h4>Human Spaceflight</h4>
+            <p>Gaganyaan orbital modules, crew escape systems, and Bharatiya Antariksha Station.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>ISRO Academic & Research Outreach</span>
+        <span>Use [→] or [Space] to advance slide</span>
+      </div>
+    </div>
+
+
+    <!-- SLIDE 2: Strategic Pillars -->
+    <div class="slide-wrapper" id="slide-2">
+      <div>
+        <div class="slide-tag">Strategic Roadmap</div>
+        <h2 class="slide-title">Three Core Pillars of Future Spacecraft</h2>
+        <p class="slide-subtitle">How modular design and high-efficiency propulsion are driving down access costs.</p>
+      </div>
+
+      <div class="slide-content-area">
+        <div class="grid-3">
+          <div class="feature-card" style="border-top: 4px solid var(--accent-cyan);">
+            <div class="feature-icon">⚡</div>
+            <h4>Cryogenic Staging</h4>
+            <p>CE-20 indigenous cryogenic upper-stage engine delivering 443 seconds of specific impulse (Isp) with LH2/LOX.</p>
+          </div>
+          <div class="feature-card" style="border-top: 4px solid var(--accent-emerald);">
+            <div class="feature-icon">♻️</div>
+            <h4>Reusable Launch (RLV)</h4>
+            <p>Autonomous runway return experiments (RLV-LEX) and vertical landing technology validation for next-gen NGLV.</p>
+          </div>
+          <div class="feature-card" style="border-top: 4px solid var(--accent-purple);">
+            <div class="feature-icon">🤖</div>
+            <h4>Autonomous Docking</h4>
+            <p>Space Docking Experiment (SPADEX) mastering precision proximity rendezvous for space station modules.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Pillar 01: Propulsion • Pillar 02: Reusability • Pillar 03: Rendezvous</span>
+        <span>Slide 2 of 10</span>
+      </div>
+    </div>
+
+
+    <!-- SLIDE 3: Launch Vehicle Fleet Comparison -->
+    <div class="slide-wrapper" id="slide-3">
+      <div>
+        <div class="slide-tag">Heavy Lift Fleet</div>
+        <h2 class="slide-title">Launch Vehicle Class Comparison</h2>
+        <p class="slide-subtitle">Payload capacity to Low Earth Orbit (LEO) vs Geostationary Transfer Orbit (GTO).</p>
+      </div>
+
+      <div class="slide-content-area">
+        <div class="grid-2">
+          <div class="feature-card">
+            <h4 style="color: var(--accent-cyan); font-size: 18px; margin-bottom: 8px;">🚀 LVM3 (Fat Boy)</h4>
+            <ul style="padding-left: 20px; font-size: 13px; line-height: 1.8; color: var(--text-muted);">
+              <li><strong>LEO Capacity:</strong> 10,000 kg (Human Rated)</li>
+              <li><strong>GTO Capacity:</strong> 4,000 kg</li>
+              <li><strong>Configuration:</strong> 2x S200 solid boosters + L110 Vikas core + C25 Cryogenic upper stage</li>
+              <li><strong>Heritage:</strong> Chandrayaan-2, Chandrayaan-3, OneWeb 72 satellites</li>
+            </ul>
+          </div>
+          <div class="feature-card">
+            <h4 style="color: var(--accent-emerald); font-size: 18px; margin-bottom: 8px;">🎯 PSLV (The Workhorse)</h4>
+            <ul style="padding-left: 20px; font-size: 13px; line-height: 1.8; color: var(--text-muted);">
+              <li><strong>SSPO Capacity:</strong> 1,750 kg</li>
+              <li><strong>Success Rate:</strong> Over 95% across 60+ missions</li>
+              <li><strong>Historic Milestones:</strong> Chandrayaan-1, Mars Orbiter (Mangalyaan), 104 satellites in one flight</li>
+              <li><strong>Staging:</strong> Alternating Solid / Liquid 4-stage architecture</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Data ground-truth from ISRO Launch Vehicle Manifest</span>
+        <span>Slide 3 of 10</span>
+      </div>
+    </div>
+
+
+    <!-- SLIDE 4: LIVE INTERACTIVE CHART SLIDE -->
+    <div class="slide-wrapper" id="slide-4">
+      <div>
+        <div class="slide-tag">Interactive Telemetry</div>
+        <h2 class="slide-title">Global Launches & Satellite Deployments</h2>
+        <p class="slide-subtitle">Interact with the chart live below to explore metrics across operational decades.</p>
+      </div>
+
+      <div class="slide-content-area">
+        <!-- Interactive Controls -->
+        <div class="chart-controls-row">
+          <span style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Metric:</span>
+          <button class="chart-tab-btn active" onclick="setChartMetric('payloads', this)">🛰️ Satellites Deployed</button>
+          <button class="chart-tab-btn" onclick="setChartMetric('launches', this)">🚀 Orbital Launches</button>
+          <button class="chart-tab-btn" onclick="setChartMetric('spending', this)">💰 Global Budget ($B)</button>
+
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12px;">
+            <span>Projected Growth:</span>
+            <input type="range" id="growthSlider" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateChartGrowth(this.value)">
+            <span id="growthLabel" style="color: var(--accent-cyan); font-weight: 700;">1.0x</span>
+          </div>
+        </div>
+
+        <!-- Live SVG Dynamic Chart -->
+        <svg class="live-chart-svg" viewBox="0 0 600 200" id="deckChartSvg">
+          <!-- Injected via JavaScript -->
+        </svg>
+      </div>
+
+      <div class="slide-footer">
+        <span>⚡ Interactive Widget: Drag slider to simulate funding expansion</span>
+        <span>Slide 4 of 10</span>
+      </div>
+    </div>
+
+
+    <!-- SLIDE 5: Aditya-L1 Solar Physics -->
+    <div class="slide-wrapper" id="slide-5">
+      <div>
+        <div class="slide-tag">Heliophysics Mission</div>
+        <h2 class="slide-title">Aditya-L1: Unlocking Solar Dynamics</h2>
+        <p class="slide-subtitle">Stationed at Sun-Earth Lagrange Point L1, 1.5 million kilometers from Earth.</p>
+      </div>
+
+      <div class="slide-content-area">
+        <div class="grid-2">
+          <div class="feature-card">
+            <h4>Halo Orbit Advantage</h4>
+            <p>At L1, the gravitational pulls of Earth and the Sun balance with orbital centripetal force. This provides an uninterrupted view of the Sun without planetary occultation or eclipses.</p>
+          </div>
+          <div class="feature-card">
+            <h4>Primary Payloads</h4>
+            <p><strong>VELC:</strong> Visible Emission Line Coronagraph observing coronal mass ejections.<br>
+            <strong>SUIT:</strong> Solar Ultraviolet Imaging Telescope taking full-disk UV images of the photosphere and chromosphere.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Launched Sept 2, 2023 • Stationed at Halo Orbit Jan 6, 2024</span>
+        <span>Slide 5 of 10</span>
+      </div>
+    </div>
+
+
+    <!-- SLIDE 6: Chandrayaan-3 South Pole Discoveries -->
+    <div class="slide-wrapper" id="slide-6">
+      <div>
+        <div class="slide-tag">Lunar Exploration</div>
+        <h2 class="slide-title">Chandrayaan-3: Shiv Shakti Point Science</h2>
+        <p class="slide-subtitle">In-situ scientific experiments on lunar soil composition and thermal behavior.</p>
+      </div>
+
+      <div class="slide-content-area">
+        <div class="grid-3">
+          <div class="feature-card">
+            <div class="feature-icon">🧪</div>
+            <h4>LIBS & APXS Payloads</h4>
+            <p>Pragyan rover confirmed the presence of Sulphur (S), Aluminum, Calcium, Iron, and Titanium in lunar regolith.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🌡️</div>
+            <h4>ChaSTE Thermal Probe</h4>
+            <p>Discovered high thermal gradient: 50°C on surface dropping to -10°C just 8 cm beneath the topsoil.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🦘</div>
+            <h4>Hop Experiment</h4>
+            <p>Vikram lander fired engines to hop 40 cm and safely reland, proving technology for future sample return missions.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Historic soft-landing August 23, 2023 • National Space Day</span>
+        <span>Slide 6 of 10</span>
+      </div>
+    </div>
+
+
+    <!-- SLIDE 7: Gaganyaan Crewed Architecture -->
+    <div class="slide-wrapper" id="slide-7">
+      <div>
+        <div class="slide-tag">Human Spaceflight</div>
+        <h2 class="slide-title">Gaganyaan: Crew Escape & Life Support</h2>
+        <p class="slide-subtitle">Demonstrating indigenous capabilities to launch humans to 400 km LEO and return safely.</p>
+      </div>
+
+      <div class="slide-content-area">
+        <div class="grid-2">
+          <div class="feature-card">
+            <h4>Orbital Module System</h4>
+            <p>Consists of the Crew Module (CM) housing 3 astronauts with dual-redundant Environmental Control and Life Support Systems (ECLSS), and the unpressurized Service Module (SM).</p>
+          </div>
+          <div class="feature-card">
+            <h4>Test Vehicle (TV-D1) Flight</h4>
+            <p>Successfully demonstrated in-flight abort simulation at Mach 1.2, jettisoning the Crew Module away from the launch vehicle with parachute recovery in the Bay of Bengal.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Vyommitra humanoid robot scheduled for uncrewed orbital qualification</span>
+        <span>Slide 7 of 10</span>
+      </div>
+    </div>
+
+
+    <!-- SLIDE 8: LIVE INTERACTIVE AUDIENCE QUIZ SLIDE -->
+    <div class="slide-wrapper" id="slide-8">
+      <div>
+        <div class="slide-tag">Audience Participation</div>
+        <h2 class="slide-title">Live Scored Knowledge Check</h2>
+        <p class="slide-subtitle">Test your retention! Click an answer below to reveal live scoring and telemetry.</p>
+      </div>
+
+      <div class="slide-content-area">
+        <div class="quiz-slide-box">
+          <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">
+            ❓ Question: Which rocket vehicle successfully propelled Chandrayaan-3 into its initial Earth orbit?
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted);">Select the correct launch configuration:</p>
+
+          <div class="quiz-slide-options">
+            <button class="quiz-opt-btn" onclick="checkSlideQuiz(0, this)">
+              <strong style="color:var(--accent-cyan);">A</strong> PSLV-C56 (Core Alone)
+            </button>
+            <button class="quiz-opt-btn" onclick="checkSlideQuiz(1, this)">
+              <strong style="color:var(--accent-cyan);">B</strong> LVM3-M4 Heavy Lifter
+            </button>
+            <button class="quiz-opt-btn" onclick="checkSlideQuiz(2, this)">
+              <strong style="color:var(--accent-cyan);">C</strong> GSLV-F12 with GSLV Mk II
+            </button>
+            <button class="quiz-opt-btn" onclick="checkSlideQuiz(3, this)">
+              <strong style="color:var(--accent-cyan);">D</strong> SSLV-D2 Small Satellite Launcher
+            </button>
+          </div>
+
+          <div id="slideQuizExplanation" style="margin-top: 16px; padding: 12px; border-radius: 8px; font-size: 13px; display: none;">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span id="quizScoreDisplay">Audience Score: 0/1</span>
+        <span>Slide 8 of 10</span>
+      </div>
+    </div>
+
+
+    <!-- SLIDE 9: 2035–2040 Vision -->
+    <div class="slide-wrapper" id="slide-9">
+      <div>
+        <div class="slide-tag">Long-Term Horizon</div>
+        <h2 class="slide-title">Bharatiya Antariksha Station (BAS) & 2040 Moon Landing</h2>
+        <p class="slide-subtitle">India's multi-module orbital habitat and roadmap for a crewed lunar landing.</p>
+      </div>
+
+      <div class="slide-content-area">
+        <div class="grid-3">
+          <div class="feature-card">
+            <h4>BAS Base Module (2028)</h4>
+            <p>First module BAS-1 launched to LEO for robotic scientific microgravity experimentation.</p>
+          </div>
+          <div class="feature-card">
+            <h4>Next-Gen Launch (NGLV)</h4>
+            <p>'Soorya' methane-liquid oxygen (Methalox) launcher with 30-ton LEO payload capacity.</p>
+          </div>
+          <div class="feature-card">
+            <h4>Crewed Moon Landing (2040)</h4>
+            <p>Targeted Indian astronaut touchdown on the lunar surface with permanent habitat architecture.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Vision approved by Union Cabinet of India</span>
+        <span>Slide 9 of 10</span>
+      </div>
+    </div>
+
+
+    <!-- SLIDE 10: Conclusion & Q&A -->
+    <div class="slide-wrapper" id="slide-10">
+      <div>
+        <div class="slide-tag">Summary & Dialogue</div>
+        <h2 class="slide-title">Conclusion & Open Discussion</h2>
+        <p class="slide-subtitle">Thank you for attending this interactive presentation.</p>
+      </div>
+
+      <div class="slide-content-area" style="text-align: center;">
+        <div style="font-size: 64px; margin-bottom: 16px;">🌌</div>
+        <h3 style="font-size: 24px; margin-bottom: 10px;">The cosmos is calling.</h3>
+        <p style="color: var(--text-muted); max-width: 520px; margin: 0 auto 24px; font-size: 14px;">
+          From humble beginnings launching sounding rockets from Thumba beach to landing on the Moon's South Pole, space exploration remains a testament to human perseverance.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <button class="btn" onclick="goToSlide(1)">⏮ Restart Deck</button>
+          <a href="index.html" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #2563eb); border: none; color: white;">🏠 Return to Main Hub</a>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Questions & Answers Session</span>
+        <span>Slide 10 of 10 • End of Deck</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Presenter Navigation Bar -->
+  <footer class="presenter-bar">
+    <div class="nav-arrow-group">
+      <button class="btn" id="btnPrevSlide" onclick="prevSlide()">← Previous</button>
+      <button class="btn" id="btnNextSlide" onclick="nextSlide()" style="background: rgba(56, 189, 248, 0.2); border-color: var(--accent-cyan); color: white;">Next →</button>
+    </div>
+
+    <div class="keyboard-hints">
+      <span><span class="kbd">←</span> / <span class="kbd">→</span> Navigate</span>
+      <span><span class="kbd">Space</span> Next</span>
+      <span><span class="kbd">F</span> Fullscreen</span>
+      <span><span class="kbd">O</span> Overview Grid</span>
+    </div>
+
+    <div>
+      <span style="font-size: 12px; color: var(--text-muted);" id="timerDisplay">⏱️ 00:00</span>
+    </div>
+  </footer>
+
+  <!-- Slide Overview Grid Modal -->
+  <div class="overview-modal" id="overviewModal">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h2 style="font-size: 22px;">Slide Overview (Click to Jump)</h2>
+      <button class="btn" onclick="toggleOverview()">✕ Close</button>
+    </div>
+    <div class="overview-grid" id="overviewGridContainer">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. SLIDE ENGINE & NAVIGATION
+       ========================================================================== */
+    const TOTAL_SLIDES = 10;
+    let currentSlide = 1;
+
+    function goToSlide(n) {
+      if (n < 1 || n > TOTAL_SLIDES) return;
+      document.querySelectorAll('.slide-wrapper').forEach(s => s.classList.remove('active'));
+      const activeEl = document.getElementById(`slide-${n}`);
+      if (activeEl) activeEl.classList.add('active');
+
+      currentSlide = n;
+      updateDeckUI();
+    }
+
+    function nextSlide() {
+      if (currentSlide < TOTAL_SLIDES) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+
+    function updateDeckUI() {
+      // Progress bar
+      const pct = (currentSlide / TOTAL_SLIDES) * 100;
+      document.getElementById('progressBar').style.width = `${pct}%`;
+      document.getElementById('slideCounter').innerText = `Slide ${currentSlide} of ${TOTAL_SLIDES}`;
+
+      // Button states
+      document.getElementById('btnPrevSlide').disabled = (currentSlide === 1);
+      document.getElementById('btnNextSlide').disabled = (currentSlide === TOTAL_SLIDES);
+
+      // Render chart if on slide 4
+      if (currentSlide === 4) {
+        renderLiveChart();
+      }
+    }
+
+    // Keyboard controls
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.code === 'Space') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key === 'o' || e.key === 'O') {
+        toggleOverview();
+      } else if (e.key === 'Escape') {
+        closeOverview();
+      }
+    });
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    /* ==========================================================================
+       2. SLIDE OVERVIEW GRID MODAL
+       ========================================================================== */
+    const SLIDE_TITLES = [
+      "Keynote Title & Vision",
+      "Three Strategic Pillars",
+      "Launch Vehicle Fleet (LVM3 vs PSLV)",
+      "Live Interactive Launch Telemetry Chart",
+      "Aditya-L1 Heliophysics",
+      "Chandrayaan-3 South Pole Discoveries",
+      "Gaganyaan Human Spaceflight Architecture",
+      "Audience Live Scored Quiz",
+      "2035–2040 Bharatiya Antariksha Station",
+      "Conclusion & Dialogue"
+    ];
+
+    function toggleOverview() {
+      const modal = document.getElementById('overviewModal');
+      const isOpen = modal.classList.toggle('active');
+      if (isOpen) {
+        renderOverviewGrid();
+      }
+    }
+
+    function closeOverview() {
+      document.getElementById('overviewModal').classList.remove('active');
+    }
+
+    function renderOverviewGrid() {
+      const container = document.getElementById('overviewGridContainer');
+      container.innerHTML = '';
+
+      for (let i = 1; i <= TOTAL_SLIDES; i++) {
+        const card = document.createElement('div');
+        card.className = `overview-card ${i === currentSlide ? 'active' : ''}`;
+        card.onclick = () => {
+          goToSlide(i);
+          closeOverview();
+        };
+        card.innerHTML = `
+          <div style="font-size: 11px; color: var(--accent-cyan); font-weight: 700; margin-bottom: 4px;">SLIDE ${i}</div>
+          <div style="font-size: 14px; font-weight: 600;">${escapeHtml(SLIDE_TITLES[i - 1])}</div>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    /* ==========================================================================
+       3. SLIDE 4: LIVE INTERACTIVE CHART
+       ========================================================================== */
+    const CHART_DATA = {
+      payloads: {
+        title: "Satellites Deployed Annually",
+        labels: ["2000s Avg", "2010s Avg", "2020", "2022", "2024", "2026 (Est)"],
+        values: [120, 310, 1280, 2400, 2900, 3600],
+        color: "#38bdf8"
+      },
+      launches: {
+        title: "Orbital Rocket Launches",
+        labels: ["2000s Avg", "2010s Avg", "2020", "2022", "2024", "2026 (Est)"],
+        values: [68, 85, 114, 186, 223, 270],
+        color: "#34d399"
+      },
+      spending: {
+        title: "Global Space Economy Revenue ($B)",
+        labels: ["2000s Avg", "2010s Avg", "2020", "2022", "2024", "2026 (Est)"],
+        values: [175, 290, 385, 464, 570, 680],
+        color: "#a855f7"
+      }
+    };
+
+    let activeChartMetric = 'payloads';
+    let chartGrowthMultiplier = 1.0;
+
+    function setChartMetric(key, btn) {
+      activeChartMetric = key;
+      document.querySelectorAll('.chart-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderLiveChart();
+    }
+
+    function updateChartGrowth(val) {
+      chartGrowthMultiplier = parseFloat(val);
+      document.getElementById('growthLabel').innerText = `${chartGrowthMultiplier.toFixed(1)}x`;
+      renderLiveChart();
+    }
+
+    function renderLiveChart() {
+      const svg = document.getElementById('deckChartSvg');
+      svg.innerHTML = '';
+
+      const data = CHART_DATA[activeChartMetric];
+      const vals = data.values.map(v => v * chartGrowthMultiplier);
+      const maxVal = Math.max(...vals) * 1.15;
+
+      const paddingLeft = 50;
+      const paddingBottom = 30;
+      const width = 580;
+      const height = 180;
+      const chartW = width - paddingLeft - 20;
+      const chartH = height - paddingBottom - 10;
+
+      // Draw Grid Lines
+      for (let i = 0; i <= 4; i++) {
+        const y = paddingBottom + (chartH / 4) * i;
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", paddingLeft);
+        line.setAttribute("y1", height - y);
+        line.setAttribute("x2", width - 20);
+        line.setAttribute("y2", height - y);
+        line.setAttribute("stroke", "rgba(255,255,255,0.06)");
+        line.setAttribute("stroke-width", "1");
+        svg.appendChild(line);
+
+        // Y-axis label
+        const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        txt.setAttribute("x", paddingLeft - 8);
+        txt.setAttribute("y", height - y + 4);
+        txt.setAttribute("text-anchor", "end");
+        txt.setAttribute("fill", "#64748b");
+        txt.setAttribute("font-size", "10");
+        txt.textContent = Math.round((maxVal / 4) * i);
+        svg.appendChild(txt);
+      }
+
+      const barWidth = chartW / (vals.length * 2);
+      const points = [];
+
+      vals.forEach((v, idx) => {
+        const x = paddingLeft + (chartW / vals.length) * idx + barWidth;
+        const barH = (v / maxVal) * chartH;
+        const y = height - paddingBottom - barH;
+
+        // Draw Bar
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", x - barWidth / 2);
+        rect.setAttribute("y", y);
+        rect.setAttribute("width", barWidth);
+        rect.setAttribute("height", barH);
+        rect.setAttribute("rx", "4");
+        rect.setAttribute("fill", data.color);
+        rect.setAttribute("opacity", "0.75");
+        svg.appendChild(rect);
+
+        // Point for line overlay
+        points.push(`${x},${y}`);
+
+        // Value text above bar
+        const valTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        valTxt.setAttribute("x", x);
+        valTxt.setAttribute("y", y - 6);
+        valTxt.setAttribute("text-anchor", "middle");
+        valTxt.setAttribute("fill", "#f8fafc");
+        valTxt.setAttribute("font-size", "10");
+        valTxt.setAttribute("font-weight", "bold");
+        valTxt.textContent = Math.round(v);
+        svg.appendChild(valTxt);
+
+        // X-axis label
+        const lbl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        lbl.setAttribute("x", x);
+        lbl.setAttribute("y", height - 10);
+        lbl.setAttribute("text-anchor", "middle");
+        lbl.setAttribute("fill", "#94a3b8");
+        lbl.setAttribute("font-size", "10");
+        lbl.textContent = data.labels[idx];
+        svg.appendChild(lbl);
+      });
+
+      // Connecting Polyline
+      const polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+      polyline.setAttribute("points", points.join(" "));
+      polyline.setAttribute("fill", "none");
+      polyline.setAttribute("stroke", "#ffffff");
+      polyline.setAttribute("stroke-width", "2");
+      polyline.setAttribute("opacity", "0.6");
+      svg.appendChild(polyline);
+    }
+
+    /* ==========================================================================
+       4. SLIDE 8: LIVE AUDIENCE QUIZ
+       ========================================================================== */
+    let quizAnswered = false;
+
+    function checkSlideQuiz(selectedIdx, btn) {
+      if (quizAnswered) return;
+      quizAnswered = true;
+
+      const correctIdx = 1; // LVM3-M4
+      const exp = document.getElementById('slideQuizExplanation');
+      const buttons = document.querySelectorAll('.quiz-opt-btn');
+
+      buttons.forEach((b, idx) => {
+        b.disabled = true;
+        if (idx === correctIdx) {
+          b.classList.add('correct');
+        } else if (idx === selectedIdx) {
+          b.classList.add('wrong');
+        }
+      });
+
+      exp.style.display = 'block';
+      if (selectedIdx === correctIdx) {
+        exp.style.background = "rgba(16, 185, 129, 0.2)";
+        exp.style.color = "#6ee7b7";
+        exp.innerHTML = "<strong>🎉 Correct!</strong> LVM3-M4 successfully injected Chandrayaan-3 into an accurate 170 km x 36,500 km elliptical orbit on July 14, 2023.";
+        document.getElementById('quizScoreDisplay').innerText = "Audience Score: 1/1 (100%)";
+      } else {
+        exp.style.background = "rgba(244, 63, 94, 0.2)";
+        exp.style.color = "#fda4af";
+        exp.innerHTML = "<strong>❌ Incorrect.</strong> The correct answer was <strong>B) LVM3-M4</strong>, ISRO's operational heavy lifter with twin S200 solid rocket boosters.";
+        document.getElementById('quizScoreDisplay').innerText = "Audience Score: 0/1 (0%)";
+      }
+    }
+
+    /* ==========================================================================
+       5. PRESENTER STOPWATCH TIMER
+       ========================================================================== */
+    let elapsedSeconds = 0;
+    setInterval(() => {
+      elapsedSeconds++;
+      const m = Math.floor(elapsedSeconds / 60);
+      const s = elapsedSeconds % 60;
+      document.getElementById('timerDisplay').innerText = 
+        `⏱️ ${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }, 1000);
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Init
+    updateDeckUI();
+  </script>
+</body>
+</html>
+

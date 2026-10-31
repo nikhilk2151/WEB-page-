@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DecisionMatrix Pro | Multi-Criteria Live Re-Ranking Engine</title>
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --bg-card-hover: rgba(28, 38, 62, 0.9);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.35);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-indigo: #6366f1;
+      --accent-cyan: #38bdf8;
+      --accent-purple: #a855f7;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      background-image:
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(56, 189, 248, 0.08) 0%, transparent 45%);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 24px 20px 48px;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
+    }
+
+    .brand-title h1 {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(to right, #ffffff, var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+      background: var(--bg-card);
+      color: var(--text-main);
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5, #0284c7);
+      border: none;
+      color: white;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.12);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    /* Template Selector Bar */
+    .template-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      background: var(--bg-card);
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      flex-wrap: wrap;
+    }
+
+    .template-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .template-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pill-btn.active,
+    .pill-btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--accent-indigo);
+      color: #c7d2fe;
+    }
+
+    /* Layout Grid */
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 1024px) {
+      .layout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Sliders List */
+    .criteria-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .criteria-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .criteria-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .criteria-name {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .criteria-weight-badge {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.12);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    input[type=range] {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-indigo);
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Leaderboard / Live Ranked Cards */
+    .rank-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    .rank-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .rank-card.pos-1 {
+      border-color: rgba(245, 158, 11, 0.5);
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(255, 255, 255, 0.03));
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.15);
+    }
+
+    .rank-card.pos-2 {
+      border-color: rgba(148, 163, 184, 0.4);
+      background: linear-gradient(135deg, rgba(148, 163, 184, 0.08), rgba(255, 255, 255, 0.03));
+    }
+
+    .rank-card.pos-3 {
+      border-color: rgba(217, 119, 6, 0.3);
+      background: linear-gradient(135deg, rgba(217, 119, 6, 0.08), rgba(255, 255, 255, 0.03));
+    }
+
+    .rank-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      background: rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+    }
+
+    .rank-card.pos-1 .rank-badge {
+      background: #f59e0b;
+      color: #000;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
+    }
+
+    .rank-info {
+      flex: 1;
+    }
+
+    .rank-name-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .rank-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .rank-score {
+      font-size: 18px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rank-progress-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .rank-progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .rank-pros-cons {
+      display: flex;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* Radar Chart Container */
+    .radar-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    #radarCanvas {
+      width: 100%;
+      max-width: 360px;
+      height: 300px;
+    }
+
+    /* Comparison Table */
+    .comparison-table-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .table-responsive {
+      push overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      padding: 12px 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    .score-cell {
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-align: center;
+      display: inline-block;
+      min-width: 32px;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
+    }
+
+    .hub-link {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
+    .hub-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="brand-icon">⚖️</div>
+        <div class="brand-title">
+          <h1>DecisionMatrix Pro</h1>
+          <p>Live Multi-Criteria Weighted Decision Engine • Instant Re-Ranking</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="badge">
+          <span>⚡ MCDA Algorithmic Engine</span>
+        </div>
+        <a href="index.html" class="btn">← Back to Hub</a>
+        <button class="btn btn-primary" onclick="window.print()">📄 Export Report</button>
+      </div>
+    </header>
+
+    <!-- Template Selector -->
+    <div class="template-bar">
+      <span class="template-label">Scenario Template:</span>
+      <div class="template-pills">
+        <button class="pill-btn active" onclick="loadTemplate('cloud', this)">☁️ Cloud Provider / Backend</button>
+        <button class="pill-btn" onclick="loadTemplate('university', this)">🎓 University / Research Fellowship</button>
+        <button class="pill-btn" onclick="loadTemplate('laptop', this)">💻 Developer Workstation</button>
+        <button class="pill-btn" onclick="loadTemplate('spacecraft', this)">🚀 ISRO Launch Vehicle Class</button>
+      </div>
+    </div>
+
+    <!-- Main 2-Column Grid -->
+    <div class="layout-grid">
+
+      <!-- LEFT: Weighted Criteria Sliders -->
+      <div class="col-left">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>🎚️ Criteria Priority Sliders</span>
+            </div>
+            <button class="btn" style="padding: 4px 10px; font-size: 12px;" onclick="resetEqualWeights()">Equal
+              Weights</button>
+          </div>
+
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+            Drag any slider to increase or decrease importance. The options on the right re-rank immediately!
+          </p>
+
+          <div class="criteria-list" id="criteriaContainer">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Radar Comparison Chart -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>🕸️ Multi-Attribute Radar Chart</span>
+            </div>
+          </div>
+          <div class="radar-wrapper">
+            <canvas id="radarCanvas" width="360" height="300"></canvas>
+          </div>
+          <div style="display:flex; justify-content:center; gap: 14px; font-size: 12px; margin-top: 8px;"
+            id="radarLegend">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Live Ranked Options (Podium & Cards) -->
+      <div class="col-right">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>🏆 Live Dynamic Ranking</span>
+            </div>
+            <span class="badge" id="topRankBadge" style="background: rgba(245,158,11,0.15); color: #fbbf24;">1st Place
+              Winner</span>
+          </div>
+
+          <div class="rank-list" id="rankedOptionsContainer">
+            <!-- Populated by JS with smooth reordering -->
+          </div>
+        </div>
+
+        <!-- Why this winner section -->
+        <div class="panel" style="background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.25);">
+          <h4 style="font-size: 14px; color: #a5b4fc; margin-bottom: 6px;">💡 Algorithmic Trade-off Insights</h4>
+          <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;" id="insightText">
+            Based on your current weighted configuration, this option excels predominantly in performance and developer
+            ergonomics, outweighing cost premiums.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Full Comparison Table -->
+    <div class="comparison-table-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>📊 Raw Score Matrix Breakdown</span>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table id="matrixTable">
+          <!-- Rendered by JS -->
+        </table>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>DecisionMatrix Pro • Multi-Criteria Decision Analysis (MCDA) Platform • <a href="index.html"
+          class="hub-link">Return to 3-in-1 Project Hub</a></p>
+    </footer>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. SCENARIO TEMPLATES & DATA
+       ========================================================================== */
+    const TEMPLATES = {
+      cloud: {
+        criteria: [
+          { id: "cost", name: "Cost & Billing Predictability", icon: "💰", weight: 60 },
+          { id: "perf", name: "Compute Performance & Latency", icon: "⚡", weight: 80 },
+          { id: "devx", name: "Developer Experience & Tooling", icon: "🛠️", weight: 75 },
+          { id: "sec", name: "Security & Global Compliance", icon: "🔒", weight: 90 },
+          { id: "ai", name: "AI & Big Data Integrations", icon: "🧠", weight: 85 }
+        ],
+        options: [
+          { id: "gcp", name: "Google Cloud Platform (GCP)", color: "#38bdf8", scores: { cost: 82, perf: 92, devx: 88, sec: 90, ai: 98 }, pros: "World-class AI/ML & BigQuery", cons: "Smaller third-party marketplace" },
+          { id: "aws", name: "Amazon Web Services (AWS)", color: "#f59e0b", scores: { cost: 70, perf: 90, devx: 78, sec: 95, ai: 85 }, pros: "Massive ecosystem & mature services", cons: "Complex pricing & IAM sprawl" },
+          { id: "azure", name: "Microsoft Azure", color: "#60a5fa", scores: { cost: 74, perf: 86, devx: 80, sec: 96, ai: 90 }, pros: "Enterprise AD/Office 365 synergy", cons: "Inconsistent portal UX" },
+          { id: "cf", name: "Cloudflare Workers & Edge", color: "#f97316", scores: { cost: 95, perf: 96, devx: 92, sec: 80, ai: 72 }, pros: "Zero cold starts & low latency edge", cons: "Stateless V8 limits compute" }
+        ]
+      },
+      spacecraft: {
+        criteria: [
+          { id: "payload", name: "Payload Capacity to LEO/GTO", icon: "🏋️", weight: 90 },
+          { id: "cost", name: "Cost Per Kilogram Launched", icon: "💵", weight: 75 },
+          { id: "heritage", name: "Flight Heritage & Reliability", icon: "🛡️", weight: 85 },
+          { id: "turnaround", name: "Launch Cadence & Turnaround", icon: "⏱️", weight: 70 },
+          { id: "tech", name: "Cryogenic Upper Stage Tech", icon: "❄️", weight: 80 }
+        ],
+        options: [
+          { id: "lvm3", name: "LVM3 (GSLV Mk III)", color: "#38bdf8", scores: { payload: 90, cost: 88, heritage: 94, turnaround: 80, tech: 95 }, pros: "Heavy lifter, Chandrayaan-3 carrier", cons: "Lower launch frequency than PSLV" },
+          { id: "pslv", name: "PSLV (Polar Satellite Launch)", color: "#10b981", scores: { payload: 75, cost: 92, heritage: 99, turnaround: 90, tech: 82 }, pros: "ISRO's workhorse (50+ successes)", cons: "Limited deep-space payload mass" },
+          { id: "sslv", name: "SSLV (Small Satellite Launch)", color: "#a855f7", scores: { payload: 60, cost: 98, heritage: 75, turnaround: 98, tech: 78 }, pros: "72-hour integration turnaround", cons: "Max 500 kg to low Earth orbit" },
+          { id: "falcon9", name: "Commercial Reusable Falcon 9", color: "#ec4899", scores: { payload: 96, cost: 90, heritage: 98, turnaround: 99, tech: 88 }, pros: "Booster propulsive landing recovery", cons: "High foreign foreign-exchange costs" }
+        ]
+      },
+      university: {
+        criteria: [
+          { id: "research", name: "Research Citations & Faculty", icon: "🔬", weight: 90 },
+          { id: "cost", name: "Tuition Affordability & Grants", icon: "💰", weight: 80 },
+          { id: "industry", name: "Industry Placement & Packages", icon: "💼", weight: 85 },
+          { id: "campus", name: "Campus Life & Housing Quality", icon: "🏫", weight: 65 },
+          { id: "alumni", name: "Global Alumni Network", icon: "🌐", weight: 75 }
+        ],
+        options: [
+          { id: "iisc", name: "IISc Bangalore", color: "#38bdf8", scores: { research: 99, cost: 95, industry: 90, campus: 84, alumni: 92 }, pros: "India's #1 research university", cons: "Heavy academic focus, less corporate flair" },
+          { id: "iitm", name: "IIT Madras", color: "#f59e0b", scores: { research: 94, cost: 90, industry: 98, campus: 90, alumni: 95 }, pros: "Top NIRF rank & deep tech park", cons: "Intense competitive pressure" },
+          { id: "stanford", name: "Stanford University", color: "#ef4444", scores: { research: 98, cost: 45, industry: 99, campus: 96, alumni: 99 }, pros: "Silicon Valley venture capital nexus", cons: "Extremely high tuition & living cost" },
+          { id: "mit", name: "MIT (Massachusetts)", color: "#a855f7", scores: { research: 100, cost: 48, industry: 98, campus: 88, alumni: 99 }, pros: "Pioneering STEM innovations", cons: "Strenuous winter climate & expenses" }
+        ]
+      },
+      laptop: {
+        criteria: [
+          { id: "cpu", name: "CPU & GPU Compute Power", icon: "⚡", weight: 85 },
+          { id: "battery", name: "Battery Endurance & Efficiency", icon: "🔋", weight: 90 },
+          { id: "screen", name: "Display Quality & Accuracy", icon: "🖥️", weight: 75 },
+          { id: "repair", name: "Port Selection & Repairability", icon: "🔧", weight: 65 },
+          { id: "price", name: "Value for Money / Price", icon: "🏷️", weight: 80 }
+        ],
+        options: [
+          { id: "macbook", name: "Apple MacBook Pro 16", color: "#38bdf8", scores: { cpu: 94, battery: 98, screen: 96, repair: 40, price: 65 }, pros: "Unrivaled battery & quiet thermals", cons: "Soldered memory & high upgrade cost" },
+          { id: "thinkpad", name: "Lenovo ThinkPad X1 Carbon", color: "#f59e0b", scores: { cpu: 85, battery: 80, screen: 88, repair: 82, price: 80 }, pros: "Iconic keyboard & military durability", cons: "Integrated Intel graphics" },
+          { id: "framework", name: "Framework Laptop 16", color: "#10b981", scores: { cpu: 88, battery: 72, screen: 86, repair: 100, price: 82 }, pros: "100% modular, repairable & upgradable", cons: "Chunky chassis, shorter battery" },
+          { id: "dellxps", name: "Dell XPS 15", color: "#a855f7", scores: { cpu: 89, battery: 76, screen: 94, repair: 70, price: 78 }, pros: "Vibrant OLED infinity display", cons: "Runs warm under full load" }
+        ]
+      }
+    };
+
+    let currentTemplate = 'cloud';
+    let activeData = JSON.parse(JSON.stringify(TEMPLATES.cloud));
+
+    function loadTemplate(key, btn) {
+      currentTemplate = key;
+      activeData = JSON.parse(JSON.stringify(TEMPLATES[key]));
+      document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderCriteria();
+      calculateAndRenderRanks();
+    }
+
+    /* ==========================================================================
+       2. RENDER CRITERIA SLIDERS
+       ========================================================================== */
+    function renderCriteria() {
+      const container = document.getElementById('criteriaContainer');
+      container.innerHTML = '';
+
+      activeData.criteria.forEach((crit, idx) => {
+        const card = document.createElement('div');
+        card.className = 'criteria-card';
+        card.innerHTML = `
+        <div class="criteria-top">
+          <span class="criteria-name">
+            <span>${crit.icon}</span>
+            <span>${escapeHtml(crit.name)}</span>
+          </span>
+          <span class="criteria-weight-badge" id="badge-${crit.id}">${crit.weight}% Weight</span>
+        </div>
+        <input type="range" min="0" max="100" value="${crit.weight}" id="slider-${crit.id}" oninput="updateCriteriaWeight('${crit.id}', this.value)">
+      `;
+        container.appendChild(card);
+      });
+    }
+
+    function updateCriteriaWeight(critId, val) {
+      const crit = activeData.criteria.find(c => c.id === critId);
+      if (crit) {
+        crit.weight = parseInt(val);
+        document.getElementById(`badge-${critId}`).innerText = `${val}% Weight`;
+        calculateAndRenderRanks();
+      }
+    }
+
+    function resetEqualWeights() {
+      activeData.criteria.forEach(c => c.weight = 70);
+      renderCriteria();
+      calculateAndRenderRanks();
+    }
+
+    /* ==========================================================================
+       3. MULTI-CRITERIA DECISION SCORING ALGORITHM
+       ========================================================================== */
+    function calculateAndRenderRanks() {
+      const totalWeight = activeData.criteria.reduce((sum, c) => sum + c.weight, 0);
+
+      const scoredOptions = activeData.options.map(opt => {
+        let weightedSum = 0;
+        activeData.criteria.forEach(c => {
+          const rawScore = opt.scores[c.id] || 0;
+          weightedSum += rawScore * c.weight;
+        });
+
+        const finalScore = totalWeight > 0 ? (weightedSum / totalWeight) : 0;
+        return {
+          ...opt,
+          compositeScore: finalScore
+        };
+      });
+
+      // Sort descending by score
+      scoredOptions.sort((a, b) => b.compositeScore - a.compositeScore);
+
+      // Update Winner Header Badge
+      const winner = scoredOptions[0];
+      document.getElementById('topRankBadge').innerText = `1st: ${winner.name} (${winner.compositeScore.toFixed(1)} pts)`;
+
+      // Render Ranked Cards
+      const container = document.getElementById('rankedOptionsContainer');
+      container.innerHTML = '';
+
+      const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+
+      scoredOptions.forEach((opt, idx) => {
+        const card = document.createElement('div');
+        card.className = `rank-card pos-${idx + 1}`;
+
+        const pct = Math.round(opt.compositeScore);
+
+        card.innerHTML = `
+        <div class="rank-badge">${medals[idx] || (idx + 1)}</div>
+        <div class="rank-info">
+          <div class="rank-name-row">
+            <span class="rank-name">${escapeHtml(opt.name)}</span>
+            <span class="rank-score" style="color: ${opt.color};">${opt.compositeScore.toFixed(1)} / 100</span>
+          </div>
+          <div class="rank-progress-track">
+            <div class="rank-progress-fill" style="width: ${pct}%; background: ${opt.color};"></div>
+          </div>
+          <div class="rank-pros-cons">
+            <span style="color: var(--accent-emerald);">✓ ${escapeHtml(opt.pros)}</span>
+            <span style="color: var(--text-muted);">• ✕ ${escapeHtml(opt.cons)}</span>
+          </div>
+        </div>
+      `;
+        container.appendChild(card);
+      });
+
+      // Update Insight Explanation
+      document.getElementById('insightText').innerHTML = `
+      <strong>${escapeHtml(winner.name)}</strong> claims the top recommendation with a score of <strong>${winner.compositeScore.toFixed(1)}%</strong>. 
+      It aligns best with your highest priority criteria (${getTopCriteriaNames()}).
+    `;
+
+      renderRadarChart(scoredOptions);
+      renderMatrixTable(scoredOptions);
+    }
+
+    function getTopCriteriaNames() {
+      const sorted = [...activeData.criteria].sort((a, b) => b.weight - a.weight);
+      return `${sorted[0]?.name || ''} and ${sorted[1]?.name || ''}`;
+    }
+
+    /* ==========================================================================
+       4. CANVAS RADAR / SPIDER CHART
+       ========================================================================== */
+    function renderRadarChart(options) {
+      const canvas = document.getElementById('radarCanvas');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+      const radius = Math.min(cx, cy) - 40;
+      const numCriteria = activeData.criteria.length;
+
+      if (numCriteria < 3) return;
+
+      // Draw background concentric polygon rings (20%, 40%, 60%, 80%, 100%)
+      const rings = 5;
+      for (let r = 1; r <= rings; r++) {
+        const ringRadius = (radius / rings) * r;
+        ctx.beginPath();
+        for (let i = 0; i < numCriteria; i++) {
+          const angle = (Math.PI * 2 / numCriteria) * i - Math.PI / 2;
+          const x = cx + Math.cos(angle) * ringRadius;
+          const y = cy + Math.sin(angle) * ringRadius;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Draw spokes and labels
+      activeData.criteria.forEach((crit, i) => {
+        const angle = (Math.PI * 2 / numCriteria) * i - Math.PI / 2;
+        const x = cx + Math.cos(angle) * radius;
+        const y = cy + Math.sin(angle) * radius;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+        ctx.stroke();
+
+        // Axis label text
+        const labelX = cx + Math.cos(angle) * (radius + 22);
+        const labelY = cy + Math.sin(angle) * (radius + 16);
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "10px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(crit.name.split(' ')[0], labelX, labelY);
+      });
+
+      // Draw top 2 options polygons
+      const topTwo = options.slice(0, 2);
+      topTwo.forEach(opt => {
+        ctx.beginPath();
+        activeData.criteria.forEach((crit, i) => {
+          const angle = (Math.PI * 2 / numCriteria) * i - Math.PI / 2;
+          const score = (opt.scores[crit.id] || 0) / 100;
+          const x = cx + Math.cos(angle) * (radius * score);
+          const y = cy + Math.sin(angle) * (radius * score);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.closePath();
+        ctx.strokeStyle = opt.color;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.fillStyle = opt.color + "25"; // semi-transparent fill
+        ctx.fill();
+      });
+
+      // Update legend
+      const legendEl = document.getElementById('radarLegend');
+      legendEl.innerHTML = topTwo.map(o => `
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="width:10px; height:10px; border-radius:50%; background:${o.color};"></span>
+        <span>${escapeHtml(o.name)}</span>
+      </div>
+    `).join('');
+    }
+
+    /* ==========================================================================
+       5. MATRIX COMPARISON TABLE
+       ========================================================================== */
+    function renderMatrixTable(options) {
+      const table = document.getElementById('matrixTable');
+      let html = `<thead><tr><th>Candidate Option</th>`;
+
+      activeData.criteria.forEach(c => {
+        html += `<th>${escapeHtml(c.name)} <br><small style="color:var(--accent-cyan); font-weight:normal;">(${c.weight}% wt)</small></th>`;
+      });
+
+      html += `<th style="text-align:right;">Final Score</th></tr></thead><tbody>`;
+
+      options.forEach(opt => {
+        html += `<tr><td><strong style="color:${opt.color};">${escapeHtml(opt.name)}</strong></td>`;
+        activeData.criteria.forEach(c => {
+          const score = opt.scores[c.id] || 0;
+          const bg = score >= 90 ? "rgba(16,185,129,0.2)" : (score >= 75 ? "rgba(56,189,248,0.15)" : "rgba(244,63,94,0.15)");
+          const col = score >= 90 ? "#6ee7b7" : (score >= 75 ? "#7dd3fc" : "#fda4af");
+          html += `<td><span class="score-cell" style="background:${bg}; color:${col};">${score}</span></td>`;
+        });
+        html += `<td style="text-align:right; font-weight:800; font-size:15px; color:${opt.color};">${opt.compositeScore.toFixed(1)}</td></tr>`;
+      });
+
+      html += `</tbody>`;
+      table.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Initial Load
+    renderCriteria();
+    calculateAndRenderRanks();
+  </script>
+
+</body>
+
+</html>

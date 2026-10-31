@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AstroLearn | Revision & Teaching Dashboard</title>
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #131b2e;
+      --bg-card: rgba(22, 32, 54, 0.75);
+      --bg-card-hover: rgba(30, 43, 73, 0.9);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(56, 189, 248, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-purple: #a855f7;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(168, 85, 247, 0.08) 0%, transparent 45%);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 24px 20px 48px;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    /* Navigation / Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+    }
+
+    .brand-title h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #ffffff, var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent-cyan);
+      border: 1px solid var(--border-accent);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: white;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0369a1, #1d4ed8);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+    }
+
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fda4af;
+      border-color: rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 63, 94, 0.25);
+    }
+
+    /* Overall Summary Metrics */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 18px 20px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .metric-card:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+    }
+
+    .metric-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .metric-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-icon {
+      font-size: 18px;
+    }
+
+    .metric-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .metric-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Main Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .panel-title span.icon {
+      font-size: 20px;
+    }
+
+    /* Progress bar */
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 12px 0 18px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald));
+      width: 0%;
+      transition: width 0.4s ease;
+      border-radius: 999px;
+    }
+
+    /* Section 1: Checklist */
+    .category-filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .filter-chip {
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .filter-chip.active, .filter-chip:hover {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+    }
+
+    .topic-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .topic-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+
+    .topic-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .topic-item.completed {
+      border-color: rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .topic-item.completed .topic-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .topic-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .custom-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 2px solid var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .topic-item.completed .custom-checkbox {
+      background: var(--accent-emerald);
+      border-color: var(--accent-emerald);
+      color: #0b0f19;
+    }
+
+    .topic-text {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .topic-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .add-topic-form {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .input-field {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    /* Section 2: Countdown & Pomodoro */
+    .timer-tabs {
+      display: flex;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 16px;
+    }
+
+    .timer-tab-btn {
+      flex: 1;
+      padding: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .timer-tab-btn.active {
+      background: var(--bg-card-hover);
+      color: var(--accent-cyan);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .countdown-display {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 18px 0;
+      text-align: center;
+    }
+
+    .time-unit-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 8px;
+    }
+
+    .time-unit-val {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .time-unit-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .pomo-circle {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      border: 6px solid rgba(56, 189, 248, 0.2);
+      border-top-color: var(--accent-cyan);
+      margin: 16px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .pomo-time {
+      font-size: 38px;
+      font-weight: 800;
+      color: var(--text-main);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pomo-status {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .pomo-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    /* Section 3: 3D Flip Flashcards */
+    .flashcard-wrapper {
+      perspective: 1000px;
+      min-height: 220px;
+      margin: 14px 0;
+    }
+
+    .flashcard {
+      width: 100%;
+      height: 220px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .flashcard.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid var(--border-accent);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-front {
+      background: linear-gradient(145deg, #16243d, #0f172a);
+    }
+
+    .card-back {
+      background: linear-gradient(145deg, #1e1b4b, #0f172a);
+      transform: rotateY(180deg);
+      border-color: rgba(168, 85, 247, 0.4);
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .card-body {
+      text-align: center;
+      margin: auto 0;
+    }
+
+    .card-question {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .card-answer {
+      font-size: 16px;
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+
+    .card-hint {
+      font-size: 12px;
+      color: var(--accent-cyan);
+      margin-top: 8px;
+    }
+
+    .flashcard-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Section 4: Scored Quiz */
+    .quiz-container {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 18px;
+      border: 1px solid var(--border-color);
+    }
+
+    .quiz-progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .quiz-question-box {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      min-height: 48px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .quiz-option-btn {
+      text-align: left;
+      padding: 12px 16px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .quiz-option-btn:hover:not(:disabled) {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: var(--accent-cyan);
+    }
+
+    .quiz-option-btn.correct {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border-color: var(--accent-emerald) !important;
+      color: #6ee7b7;
+    }
+
+    .quiz-option-btn.wrong {
+      background: rgba(244, 63, 94, 0.2) !important;
+      border-color: var(--accent-rose) !important;
+      color: #fda4af;
+    }
+
+    .quiz-explanation {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-left: 4px solid var(--accent-cyan);
+      font-size: 13px;
+      color: #cbd5e1;
+      display: none;
+    }
+
+    .quiz-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 16px;
+      gap: 10px;
+    }
+
+    .quiz-results-card {
+      text-align: center;
+      padding: 24px 16px;
+      display: none;
+    }
+
+    .score-badge {
+      font-size: 48px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-emerald));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
+    }
+
+    .hub-link {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
+    .hub-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🚀</div>
+      <div class="brand-title">
+        <h1>AstroLearn Revision Hub</h1>
+        <p>Interactive Teaching & Exam Prep Dashboard | Space Sciences & Engineering</p>
+      </div>
+    </div>
+    <div class="header-controls">
+      <div class="badge">
+        <span>🎯 Goal: Flight Ready</span>
+      </div>
+      <a href="index.html" class="btn">← Back to Hub</a>
+      <button class="btn btn-primary" onclick="resetAllData()">Reset Demo</button>
+    </div>
+  </header>
+
+  <!-- Metric Quick Summary -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-header">
+        <span class="metric-title">Revision Progress</span>
+        <span class="metric-icon">📊</span>
+      </div>
+      <div class="metric-value" id="overallProgressVal">0%</div>
+      <div class="metric-subtitle"><span id="topicsCompletedCount">0</span> of <span id="topicsTotalCount">8</span> topics ticked</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <span class="metric-title">Exam Countdown</span>
+        <span class="metric-icon">⏳</span>
+      </div>
+      <div class="metric-value" id="examDaysLeft">--</div>
+      <div class="metric-subtitle">Days until National Science Exam</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <span class="metric-title">Flashcard Mastery</span>
+        <span class="metric-icon">🃏</span>
+      </div>
+      <div class="metric-value" id="masteryVal">0 / 6</div>
+      <div class="metric-subtitle">Concepts mastered today</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <span class="metric-title">Latest Quiz Score</span>
+        <span class="metric-icon">🏆</span>
+      </div>
+      <div class="metric-value" id="quizHeaderScore">--%</div>
+      <div class="metric-subtitle" id="quizHeaderRank">Pending Evaluation</div>
+    </div>
+  </div>
+
+  <!-- Main 2-Column Grid -->
+  <div class="dashboard-grid">
+    
+    <!-- LEFT COLUMN: Topics Checklist & Scored Quiz -->
+    <div class="col-left">
+      
+      <!-- Panel 1: Topics to Tick Off -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="icon">✅</span>
+            <span>Syllabus Checklist & Mastery</span>
+          </div>
+          <span class="badge" id="checklistPercentageBadge">0% Done</span>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill" id="topicProgressBar"></div>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="category-filter-bar">
+          <button class="filter-chip active" onclick="filterTopics('all', this)">All Modules</button>
+          <button class="filter-chip" onclick="filterTopics('Propulsion', this)">Propulsion & Rockets</button>
+          <button class="filter-chip" onclick="filterTopics('Orbits', this)">Orbital Mechanics</button>
+          <button class="filter-chip" onclick="filterTopics('Payloads', this)">Satellites & Payloads</button>
+        </div>
+
+        <!-- Checklist -->
+        <ul class="topic-list" id="topicListElement">
+          <!-- Populated by JS -->
+        </ul>
+
+        <!-- Add Topic -->
+        <form class="add-topic-form" onsubmit="addNewTopic(event)">
+          <input type="text" id="newTopicInput" class="input-field" placeholder="Add custom topic to revise..." required>
+          <select id="newTopicCategory" class="input-field" style="max-width: 160px;">
+            <option value="Propulsion">Propulsion</option>
+            <option value="Orbits">Orbits</option>
+            <option value="Payloads">Payloads</option>
+            <option value="General">General</option>
+          </select>
+          <button type="submit" class="btn btn-primary">+ Add</button>
+        </form>
+      </div>
+
+      <!-- Panel 2: Scored Quiz -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="icon">🧠</span>
+            <span>Interactive Knowledge Check Quiz</span>
+          </div>
+          <span class="badge" id="quizQuestionCountBadge">Question 1 of 5</span>
+        </div>
+
+        <div class="quiz-container" id="quizActiveBox">
+          <div class="quiz-progress-text">
+            <span>Progress: <strong id="quizProgressNum">20%</strong></span>
+            <span>Current Score: <strong id="quizLiveScore" style="color: var(--accent-emerald);">0 pts</strong></span>
+          </div>
+
+          <div class="quiz-question-box" id="quizQuestionText">
+            Loading question...
+          </div>
+
+          <div class="quiz-options" id="quizOptionsContainer">
+            <!-- Options injected here -->
+          </div>
+
+          <div class="quiz-explanation" id="quizExplanationBox">
+            <!-- Explanation injected here -->
+          </div>
+
+          <div class="quiz-actions">
+            <button class="btn btn-primary" id="quizNextBtn" onclick="nextQuizQuestion()" style="display: none;">Next Question →</button>
+          </div>
+        </div>
+
+        <!-- Quiz Results Screen -->
+        <div class="quiz-results-card" id="quizResultsBox">
+          <div class="score-badge" id="finalQuizPercentage">80%</div>
+          <h2 style="font-size: 22px; margin-bottom: 6px;" id="finalQuizTitle">Outstanding Flight Commander!</h2>
+          <p style="color: var(--text-muted); font-size: 14px; max-width: 440px; margin: 0 auto 20px;" id="finalQuizMessage">
+            You have mastered the core space science principles required for mission readiness.
+          </p>
+          <button class="btn btn-primary" onclick="restartQuiz()">🔄 Retake Quiz</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Countdown / Pomodoro & 3D Flip Flashcards -->
+    <div class="col-right">
+
+      <!-- Panel 3: Countdown Timers -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="icon">⏱️</span>
+            <span>Mission Timers & Focus</span>
+          </div>
+        </div>
+
+        <div class="timer-tabs">
+          <button class="timer-tab-btn active" id="tabCountdownBtn" onclick="switchTimerTab('countdown')">Exam Target Countdown</button>
+          <button class="timer-tab-btn" id="tabPomodoroBtn" onclick="switchTimerTab('pomodoro')">Pomodoro Focus Timer</button>
+        </div>
+
+        <!-- Mode A: Target Exam Countdown -->
+        <div id="targetCountdownView">
+          <p style="font-size: 13px; color: var(--text-muted); text-align: center;">Target: <strong>All-India Space Science Fellowship Exam</strong></p>
+          <div class="countdown-display">
+            <div class="time-unit-box">
+              <div class="time-unit-val" id="cntDays">14</div>
+              <div class="time-unit-lbl">Days</div>
+            </div>
+            <div class="time-unit-box">
+              <div class="time-unit-val" id="cntHours">08</div>
+              <div class="time-unit-lbl">Hours</div>
+            </div>
+            <div class="time-unit-box">
+              <div class="time-unit-val" id="cntMins">45</div>
+              <div class="time-unit-lbl">Mins</div>
+            </div>
+            <div class="time-unit-box">
+              <div class="time-unit-val" id="cntSecs">20</div>
+              <div class="time-unit-lbl">Secs</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; justify-content: center; margin-top: 10px;">
+            <input type="date" id="customTargetDateInput" class="input-field" style="max-width: 180px; font-size: 12px; padding: 6px 10px;" onchange="updateTargetDate(this.value)">
+            <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="resetDefaultDate()">Reset Date</button>
+          </div>
+        </div>
+
+        <!-- Mode B: Pomodoro Focus Timer -->
+        <div id="pomodoroView" style="display: none;">
+          <div class="pomo-circle">
+            <div class="pomo-time" id="pomoTimeDisplay">25:00</div>
+            <div class="pomo-status" id="pomoStatusLabel">Study Sprint</div>
+          </div>
+          <div class="pomo-controls">
+            <button class="btn btn-primary" id="pomoStartBtn" onclick="togglePomodoro()">▶ Start Focus</button>
+            <button class="btn" onclick="resetPomodoro()">Reset</button>
+            <button class="btn" onclick="setPomodoroMode('break')">☕ 5m Break</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 4: Interactive 3D Flip Flashcards -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="icon">🎴</span>
+            <span>Formula & Concept Flip-Cards</span>
+          </div>
+          <span class="badge" id="cardDeckCounter">1 / 6</span>
+        </div>
+
+        <p style="font-size: 13px; color: var(--text-muted);">Click anywhere on card or press Space to flip!</p>
+
+        <!-- 3D Flashcard Element -->
+        <div class="flashcard-wrapper">
+          <div class="flashcard" id="activeFlashcard" onclick="flipCard()">
+            <!-- Front -->
+            <div class="card-face card-front">
+              <div class="card-meta">
+                <span class="badge" id="cardCategory">Orbital Mechanics</span>
+                <span>💡 Question</span>
+              </div>
+              <div class="card-body">
+                <div class="card-question" id="cardQuestion">What is the formula for Earth's escape velocity?</div>
+                <div class="card-hint">Tap card to reveal formula & derivation</div>
+              </div>
+              <div class="card-meta">
+                <span>Card <span id="cardNumCurrent">1</span> of <span id="cardNumTotal">6</span></span>
+                <span>Difficulty: Medium</span>
+              </div>
+            </div>
+
+            <!-- Back -->
+            <div class="card-face card-back">
+              <div class="card-meta">
+                <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">Solution</span>
+                <span>✅ Answer</span>
+              </div>
+              <div class="card-body">
+                <div class="card-answer" id="cardAnswer">
+                  $$v_e = \sqrt{\frac{2GM}{R}} \approx 11.2\text{ km/s}$$
+                  <p style="font-size: 13px; margin-top: 8px; color: #94a3b8;">
+                    At this minimum speed, an object escapes Earth's gravitational field without further propulsion.
+                  </p>
+                </div>
+              </div>
+              <div class="card-meta">
+                <span>Click to flip back</span>
+                <span style="color: var(--accent-emerald);">Key ISRO Exam Formula</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flashcard Controls -->
+        <div class="flashcard-controls">
+          <button class="btn" onclick="prevCard()">← Prev</button>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" onclick="flipCard()">🔄 Flip</button>
+            <button class="btn" id="masterCardBtn" onclick="markMastered()" style="color: var(--accent-emerald); border-color: rgba(16,185,129,0.3);">✓ Mastered</button>
+          </div>
+          <button class="btn btn-primary" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>AstroLearn Revision Engine • Designed for paired learning and self-paced study • <a href="index.html" class="hub-link">Return to 3-in-1 Project Hub</a></p>
+  </footer>
+</div>
+
+<script>
+  /* ==========================================================================
+     1. TOPICS CHECKLIST MODULE
+     ========================================================================== */
+  const DEFAULT_TOPICS = [
+    { id: 1, text: "Specific Impulse (Isp) and Tsiolkovsky Rocket Equation", category: "Propulsion", done: true },
+    { id: 2, text: "Cryogenic vs Semi-Cryogenic Staging (CE-20 & Vikas Engine)", category: "Propulsion", done: true },
+    { id: 3, text: "Kepler's Laws of Planetary Motion & Hohmann Transfer Orbits", category: "Orbits", done: false },
+    { id: 4, text: "Geostationary vs Low Earth Orbit (GEO vs LEO) inclination tradeoffs", category: "Orbits", done: false },
+    { id: 5, text: "Lagrangian Points (L1 to L5) & Halo Orbit Stability (Aditya-L1)", category: "Orbits", done: false },
+    { id: 6, text: "Synthetic Aperture Radar (SAR) basics & NISAR payload specs", category: "Payloads", done: false },
+    { id: 7, text: "Telemetry, Tracking and Command (TTC) deep space networks", category: "Payloads", done: false },
+    { id: 8, text: "Thermal Protection System (TPS) during atmospheric re-entry", category: "Propulsion", done: false }
+  ];
+
+  let topics = JSON.parse(localStorage.getItem('astrolearn_topics')) || DEFAULT_TOPICS;
+  let currentFilter = 'all';
+
+  function saveTopics() {
+    localStorage.setItem('astrolearn_topics', JSON.stringify(topics));
+    renderTopics();
+    updateMetrics();
+  }
+
+  function renderTopics() {
+    const listEl = document.getElementById('topicListElement');
+    listEl.innerHTML = '';
+
+    const filtered = topics.filter(t => currentFilter === 'all' || t.category === currentFilter);
+
+    filtered.forEach(topic => {
+      const li = document.createElement('li');
+      li.className = `topic-item ${topic.done ? 'completed' : ''}`;
+      li.innerHTML = `
+        <div class="topic-left" onclick="toggleTopic(${topic.id})">
+          <div class="custom-checkbox">
+            ${topic.done ? '✓' : ''}
+          </div>
+          <div>
+            <div class="topic-text">${escapeHtml(topic.text)}</div>
+            <span class="topic-tag">${escapeHtml(topic.category)}</span>
+          </div>
+        </div>
+        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteTopic(${topic.id})">✕</button>
+      `;
+      listEl.appendChild(li);
+    });
+  }
+
+  function toggleTopic(id) {
+    topics = topics.map(t => t.id === id ? { ...t, done: !t.done } : t);
+    saveTopics();
+  }
+
+  function deleteTopic(id) {
+    topics = topics.filter(t => t.id !== id);
+    saveTopics();
+  }
+
+  function addNewTopic(e) {
+    e.preventDefault();
+    const input = document.getElementById('newTopicInput');
+    const cat = document.getElementById('newTopicCategory');
+    if (!input.value.trim()) return;
+
+    topics.push({
+      id: Date.now(),
+      text: input.value.trim(),
+      category: cat.value,
+      done: false
+    });
+
+    input.value = '';
+    saveTopics();
+  }
+
+  function filterTopics(cat, btn) {
+    currentFilter = cat;
+    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTopics();
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  /* ==========================================================================
+     2. COUNTDOWN & POMODORO MODULE
+     ========================================================================== */
+  let targetExamDate = new Date();
+  targetExamDate.setDate(targetExamDate.getDate() + 14);
+  targetExamDate.setHours(9, 0, 0, 0);
+
+  const savedDate = localStorage.getItem('astrolearn_target_date');
+  if (savedDate) {
+    targetExamDate = new Date(savedDate);
+  }
+
+  function updateTargetDate(val) {
+    if (!val) return;
+    targetExamDate = new Date(val + "T09:00:00");
+    localStorage.setItem('astrolearn_target_date', targetExamDate.toISOString());
+    updateCountdownTick();
+  }
+
+  function resetDefaultDate() {
+    targetExamDate = new Date();
+    targetExamDate.setDate(targetExamDate.getDate() + 14);
+    targetExamDate.setHours(9, 0, 0, 0);
+    localStorage.removeItem('astrolearn_target_date');
+    updateCountdownTick();
+  }
+
+  function updateCountdownTick() {
+    const now = new Date();
+    const diff = targetExamDate - now;
+
+    if (diff <= 0) {
+      document.getElementById('cntDays').innerText = "00";
+      document.getElementById('cntHours').innerText = "00";
+      document.getElementById('cntMins').innerText = "00";
+      document.getElementById('cntSecs').innerText = "00";
+      document.getElementById('examDaysLeft').innerText = "0";
+      return;
+    }
+
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const m = Math.floor((diff / 1000 / 60) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+
+    document.getElementById('cntDays').innerText = String(d).padStart(2, '0');
+    document.getElementById('cntHours').innerText = String(h).padStart(2, '0');
+    document.getElementById('cntMins').innerText = String(m).padStart(2, '0');
+    document.getElementById('cntSecs').innerText = String(s).padStart(2, '0');
+    document.getElementById('examDaysLeft').innerText = d;
+  }
+
+  setInterval(updateCountdownTick, 1000);
+
+  // Tab switcher
+  function switchTimerTab(tab) {
+    const isTarget = tab === 'countdown';
+    document.getElementById('targetCountdownView').style.display = isTarget ? 'block' : 'none';
+    document.getElementById('pomodoroView').style.display = isTarget ? 'none' : 'block';
+    document.getElementById('tabCountdownBtn').classList.toggle('active', isTarget);
+    document.getElementById('tabPomodoroBtn').classList.toggle('active', !isTarget);
+  }
+
+  // Pomodoro
+  let pomoTime = 25 * 60;
+  let pomoRunning = false;
+  let pomoTimerId = null;
+
+  function togglePomodoro() {
+    const btn = document.getElementById('pomoStartBtn');
+    if (pomoRunning) {
+      clearInterval(pomoTimerId);
+      pomoRunning = false;
+      btn.innerText = "▶ Resume";
+    } else {
+      pomoRunning = true;
+      btn.innerText = "⏸ Pause";
+      pomoTimerId = setInterval(() => {
+        if (pomoTime > 0) {
+          pomoTime--;
+          renderPomo();
+        } else {
+          clearInterval(pomoTimerId);
+          pomoRunning = false;
+          playBeep();
+          alert("Focus session completed! Take a 5-minute breather.");
+          setPomodoroMode('break');
+        }
+      }, 1000);
+    }
+  }
+
+  function resetPomodoro() {
+    clearInterval(pomoTimerId);
+    pomoRunning = false;
+    pomoTime = 25 * 60;
+    document.getElementById('pomoStartBtn').innerText = "▶ Start Focus";
+    document.getElementById('pomoStatusLabel').innerText = "Study Sprint";
+    renderPomo();
+  }
+
+  function setPomodoroMode(mode) {
+    clearInterval(pomoTimerId);
+    pomoRunning = false;
+    document.getElementById('pomoStartBtn').innerText = "▶ Start";
+    if (mode === 'break') {
+      pomoTime = 5 * 60;
+      document.getElementById('pomoStatusLabel').innerText = "Rest Break";
+    } else {
+      pomoTime = 25 * 60;
+      document.getElementById('pomoStatusLabel').innerText = "Study Sprint";
+    }
+    renderPomo();
+  }
+
+  function renderPomo() {
+    const m = Math.floor(pomoTime / 60);
+    const s = pomoTime % 60;
+    document.getElementById('pomoTimeDisplay').innerText = 
+      `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  function playBeep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.35);
+    } catch(e) {}
+  }
+
+  /* ==========================================================================
+     3. 3D FLIP FLASHCARDS MODULE
+     ========================================================================== */
+  const FLASHCARDS = [
+    {
+      category: "Orbital Mechanics",
+      question: "What is Earth's escape velocity formula and numerical value?",
+      answer: "v_e = √(2GM / R) ≈ 11.19 km/s. It represents the minimum launch velocity required for a ballistic object to overcome Earth's gravitational field completely.",
+      difficulty: "Medium"
+    },
+    {
+      category: "Rocket Propulsion",
+      question: "What is the Tsiolkovsky Rocket Equation?",
+      answer: "Δv = I_sp · g_0 · ln(m_initial / m_final). Demonstrates that achieving higher velocity change requires either higher specific impulse (fuel efficiency) or high mass ratio.",
+      difficulty: "Hard"
+    },
+    {
+      category: "Satellite Systems",
+      question: "What makes a Geostationary Orbit (GEO) unique?",
+      answer: "Altitude ~35,786 km, circular orbit with zero inclination. The satellite's orbital period matches Earth's 23h 56m sidereal rotation, remaining fixed above one longitude.",
+      difficulty: "Easy"
+    },
+    {
+      category: "Space Missions",
+      question: "Why was the Sun-Earth L1 point chosen for ISRO's Aditya-L1?",
+      answer: "Lagrange Point 1 (~1.5M km from Earth towards the Sun) allows continuous 24/7 observation of the Sun without occultation or eclipses.",
+      difficulty: "Medium"
+    },
+    {
+      category: "Atmospheric Entry",
+      question: "Why are blunt-body heat shields used for spacecraft re-entry?",
+      answer: "A blunt shape creates a detached bow shock wave in front of the vehicle. This deflects over 90% of the intense aerodynamic frictional heat into the surrounding airflow.",
+      difficulty: "Hard"
+    },
+    {
+      category: "Space Exploration",
+      question: "What key finding did Chandrayaan-1's Moon Mineralogy Mapper discover?",
+      answer: "Unambiguous spectroscopic evidence of water (H2O) and hydroxyl (OH) molecules across polar lunar soil, published in Science in 2009.",
+      difficulty: "Easy"
+    }
+  ];
+
+  let cardIndex = 0;
+  let masteredCards = new Set(JSON.parse(localStorage.getItem('astrolearn_mastered') || '[]'));
+
+  function renderCard() {
+    const card = FLASHCARDS[cardIndex];
+    const el = document.getElementById('activeFlashcard');
+    el.classList.remove('flipped');
+
+    document.getElementById('cardCategory').innerText = card.category;
+    document.getElementById('cardQuestion').innerText = card.question;
+    document.getElementById('cardAnswer').innerHTML = card.answer;
+    document.getElementById('cardNumCurrent').innerText = cardIndex + 1;
+    document.getElementById('cardNumTotal').innerText = FLASHCARDS.length;
+    document.getElementById('cardDeckCounter').innerText = `${cardIndex + 1} / ${FLASHCARDS.length}`;
+
+    const isMastered = masteredCards.has(cardIndex);
+    const mBtn = document.getElementById('masterCardBtn');
+    mBtn.innerText = isMastered ? "★ Mastered" : "✓ Mark Mastered";
+    mBtn.style.background = isMastered ? "rgba(16, 185, 129, 0.2)" : "";
+
+    document.getElementById('masteryVal').innerText = `${masteredCards.size} / ${FLASHCARDS.length}`;
+  }
+
+  function flipCard() {
+    document.getElementById('activeFlashcard').classList.toggle('flipped');
+  }
+
+  function nextCard() {
+    cardIndex = (cardIndex + 1) % FLASHCARDS.length;
+    renderCard();
+  }
+
+  function prevCard() {
+    cardIndex = (cardIndex - 1 + FLASHCARDS.length) % FLASHCARDS.length;
+    renderCard();
+  }
+
+  function markMastered() {
+    if (masteredCards.has(cardIndex)) {
+      masteredCards.delete(cardIndex);
+    } else {
+      masteredCards.add(cardIndex);
+    }
+    localStorage.setItem('astrolearn_mastered', JSON.stringify([...masteredCards]));
+    renderCard();
+  }
+
+  // Keyboard shortcut for flashcards (Space to flip)
+  window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      flipCard();
+    } else if (e.code === 'ArrowRight') {
+      nextCard();
+    } else if (e.code === 'ArrowLeft') {
+      prevCard();
+    }
+  });
+
+  /* ==========================================================================
+     4. SCORED QUIZ MODULE
+     ========================================================================== */
+  const QUIZ_QUESTIONS = [
+    {
+      question: "Which rocket propellant combination powers the Vikas Engine in PSLV and LVM3 core stages?",
+      options: [
+        "Liquid Hydrogen (LH2) and Liquid Oxygen (LOX)",
+        "UDMH (Unsymmetrical Dimethylhydrazine) and Nitrogen Tetroxide (N2O4)",
+        "Refined Kerosene (RP-1) and Liquid Oxygen",
+        "Solid HTPB (Hydroxyl-terminated polybutadiene)"
+      ],
+      correct: 1,
+      explanation: "Vikas engines run on hypergolic storable liquid propellants: UDMH fuel and N2O4 oxidizer, which ignite spontaneously on contact without an external igniter."
+    },
+    {
+      question: "What is the orbital altitude of a Geostationary Earth Orbit (GEO)?",
+      options: [
+        "Around 400 to 500 km",
+        "Around 2,000 km",
+        "Approximately 35,786 km",
+        "Over 384,400 km"
+      ],
+      correct: 2,
+      explanation: "At approximately 35,786 km above Earth's equator, a satellite's orbital period matches Earth's rotation period (one sidereal day), allowing communications dishes to point at a fixed spot."
+    },
+    {
+      question: "What primary mission milestone did Chandrayaan-3 achieve on August 23, 2023?",
+      options: [
+        "First mission to return lunar core samples",
+        "First successful soft landing near the Moon's South Pole region",
+        "First human landing since Apollo 17",
+        "Longest rover distance driven on Moon"
+      ],
+      correct: 1,
+      explanation: "The Vikram lander and Pragyan rover successfully soft-landed near the lunar South Pole (Shiv Shakti Point), making India the 4th nation to soft-land on the Moon and the 1st near the South Pole."
+    },
+    {
+      question: "According to Kepler's Second Law (Law of Equal Areas), when does a planet or satellite travel fastest?",
+      options: [
+        "At Aphelion / Apogee (farthest from the focal center)",
+        "At Perihelion / Perigee (closest to the focal center)",
+        "At constant uniform speed throughout the whole ellipse",
+        "When crossing the ascending node"
+      ],
+      correct: 1,
+      explanation: "To sweep out equal areas in equal intervals of time, a body must move faster when it is near perihelion/perigee where the radius vector is shortest."
+    },
+    {
+      question: "In cryogenic rocket engines, what temperature is liquid hydrogen typically stored at?",
+      options: [
+        "-50 °C (223 K)",
+        "-100 °C (173 K)",
+        "-183 °C (90 K)",
+        "-253 °C (20 K)"
+      ],
+      correct: 3,
+      explanation: "Liquid Hydrogen (LH2) boils at -252.87 °C (20.28 K), requiring vacuum-insulated tanks and turbopumps engineered for deep cryogenic temperatures."
+    }
+  ];
+
+  let currentQuestionIdx = 0;
+  let quizScore = 0;
+  let answerSubmitted = false;
+
+  function renderQuizQuestion() {
+    const q = QUIZ_QUESTIONS[currentQuestionIdx];
+    document.getElementById('quizQuestionCountBadge').innerText = `Question ${currentQuestionIdx + 1} of ${QUIZ_QUESTIONS.length}`;
+    document.getElementById('quizProgressNum').innerText = `${Math.round(((currentQuestionIdx) / QUIZ_QUESTIONS.length) * 100)}%`;
+    document.getElementById('quizLiveScore').innerText = `${quizScore} pts`;
+    document.getElementById('quizQuestionText').innerText = q.question;
+
+    const optionsContainer = document.getElementById('quizOptionsContainer');
+    optionsContainer.innerHTML = '';
+
+    const letters = ['A', 'B', 'C', 'D'];
+    q.options.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-option-btn';
+      btn.innerHTML = `<strong style="color: var(--accent-cyan);">${letters[idx]}</strong> <span>${escapeHtml(opt)}</span>`;
+      btn.onclick = () => selectQuizOption(idx);
+      optionsContainer.appendChild(btn);
+    });
+
+    document.getElementById('quizExplanationBox').style.display = 'none';
+    document.getElementById('quizNextBtn').style.display = 'none';
+    answerSubmitted = false;
+  }
+
+  function selectQuizOption(selectedIdx) {
+    if (answerSubmitted) return;
+    answerSubmitted = true;
+
+    const q = QUIZ_QUESTIONS[currentQuestionIdx];
+    const buttons = document.querySelectorAll('.quiz-option-btn');
+
+    buttons.forEach((btn, idx) => {
+      btn.disabled = true;
+      if (idx === q.correct) {
+        btn.classList.add('correct');
+      } else if (idx === selectedIdx) {
+        btn.classList.add('wrong');
+      }
+    });
+
+    if (selectedIdx === q.correct) {
+      quizScore += 20;
+      document.getElementById('quizLiveScore').innerText = `${quizScore} pts`;
+      playBeep();
+    }
+
+    const expBox = document.getElementById('quizExplanationBox');
+    expBox.innerHTML = `<strong>${selectedIdx === q.correct ? '🎉 Correct!' : '❌ Incorrect.'}</strong> ${q.explanation}`;
+    expBox.style.display = 'block';
+
+    const nextBtn = document.getElementById('quizNextBtn');
+    nextBtn.innerText = currentQuestionIdx === QUIZ_QUESTIONS.length - 1 ? 'View Final Results 🏆' : 'Next Question →';
+    nextBtn.style.display = 'inline-flex';
+  }
+
+  function nextQuizQuestion() {
+    if (currentQuestionIdx < QUIZ_QUESTIONS.length - 1) {
+      currentQuestionIdx++;
+      renderQuizQuestion();
+    } else {
+      finishQuiz();
+    }
+  }
+
+  function finishQuiz() {
+    document.getElementById('quizActiveBox').style.display = 'none';
+    const resBox = document.getElementById('quizResultsBox');
+    resBox.style.display = 'block';
+
+    const pct = Math.round((quizScore / (QUIZ_QUESTIONS.length * 20)) * 100);
+    document.getElementById('finalQuizPercentage').innerText = `${pct}%`;
+    document.getElementById('quizHeaderScore').innerText = `${pct}%`;
+
+    let rank = "Orbital Cadet";
+    let msg = "Good effort! Review the flashcards and try again to attain flight qualification.";
+    if (pct >= 80) {
+      rank = "Flight Director 🚀";
+      msg = "Sensational! You exhibit deep theoretical mastery of space propulsion and systems.";
+    } else if (pct >= 60) {
+      rank = "Payload Specialist 🛰️";
+      msg = "Solid performance! A quick recap on orbital mechanics will make your knowledge airtight.";
+    }
+
+    document.getElementById('finalQuizTitle').innerText = rank;
+    document.getElementById('finalQuizMessage').innerText = msg;
+    document.getElementById('quizHeaderRank').innerText = rank;
+    localStorage.setItem('astrolearn_quiz_score', pct);
+  }
+
+  function restartQuiz() {
+    currentQuestionIdx = 0;
+    quizScore = 0;
+    document.getElementById('quizActiveBox').style.display = 'block';
+    document.getElementById('quizResultsBox').style.display = 'none';
+    renderQuizQuestion();
+  }
+
+  /* ==========================================================================
+     5. OVERALL METRICS & RESET
+     ========================================================================== */
+  function updateMetrics() {
+    const total = topics.length;
+    const completed = topics.filter(t => t.done).length;
+    const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+    document.getElementById('overallProgressVal').innerText = `${pct}%`;
+    document.getElementById('topicsCompletedCount').innerText = completed;
+    document.getElementById('topicsTotalCount').innerText = total;
+    document.getElementById('topicProgressBar').style.width = `${pct}%`;
+    document.getElementById('checklistPercentageBadge').innerText = `${pct}% Done`;
+
+    const savedQuiz = localStorage.getItem('astrolearn_quiz_score');
+    if (savedQuiz) {
+      document.getElementById('quizHeaderScore').innerText = `${savedQuiz}%`;
+      document.getElementById('quizHeaderRank').innerText = savedQuiz >= 80 ? "Flight Director" : "Cadet";
+    }
+  }
+
+  function resetAllData() {
+    if (confirm("Reset all revision checklist progress and flashcard mastery?")) {
+      localStorage.removeItem('astrolearn_topics');
+      localStorage.removeItem('astrolearn_mastered');
+      localStorage.removeItem('astrolearn_quiz_score');
+      topics = [...DEFAULT_TOPICS];
+      masteredCards = new Set();
+      saveTopics();
+      renderCard();
+      restartQuiz();
+      updateMetrics();
+    }
+  }
+
+  // Initial Boot
+  renderTopics();
+  updateCountdownTick();
+  renderCard();
+  renderQuizQuestion();
+  updateMetrics();
+</script>
+
+</body>
+</html>
+

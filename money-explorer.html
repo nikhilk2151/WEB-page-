@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinOrbit | Money Explorer & Financial Health</title>
+  <style>
+    :root {
+      --bg-primary: #090d16;
+      --bg-secondary: #0f172a;
+      --bg-card: rgba(18, 26, 44, 0.75);
+      --bg-card-hover: rgba(28, 40, 68, 0.9);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(56, 189, 248, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-emerald: #10b981;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      --font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(56, 189, 248, 0.07) 0%, transparent 45%);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 24px 20px 48px;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .brand-title h1 {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(to right, #ffffff, var(--accent-emerald));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-amber {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--accent-amber);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #059669, #0d9488);
+      border: none;
+      color: white;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #047857, #0f766e);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    /* KPI Row */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .kpi-val {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .text-emerald { color: var(--accent-emerald) !important; }
+    .text-amber { color: var(--accent-amber) !important; }
+    .text-rose { color: var(--accent-rose) !important; }
+
+    /* Panels & Layout */
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 1024px) {
+      .layout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    /* SECTION 1: SPENDING BY CATEGORY */
+    .chart-container {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .donut-wrapper {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      flex-shrink: 0;
+      margin: 0 auto;
+    }
+
+    .donut-svg {
+      transform: rotate(-90deg);
+      border-radius: 50%;
+    }
+
+    .donut-center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .donut-center-amount {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .donut-center-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .category-legend {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .legend-color-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .legend-info {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Category budget bars */
+    .category-budget-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .cat-bar-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .cat-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .cat-bar-track {
+      height: 7px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .cat-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    /* SECTION 2: DUPLICATES TO CHECK */
+    .duplicates-banner {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .duplicates-banner-icon {
+      font-size: 24px;
+      color: var(--accent-amber);
+    }
+
+    .duplicates-banner-text h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fde68a;
+    }
+
+    .duplicates-banner-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .duplicate-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .duplicate-card {
+      background: rgba(244, 63, 94, 0.06);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      transition: all 0.2s;
+    }
+
+    .duplicate-card.resolved {
+      opacity: 0.5;
+      background: rgba(255, 255, 255, 0.02);
+      border-color: var(--border-color);
+      pointer-events: none;
+    }
+
+    .duplicate-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .duplicate-merchant {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .duplicate-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .duplicate-amount {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent-rose);
+    }
+
+    .duplicate-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* SECTION 3: SAVINGS SLIDER & SCENARIO CALCULATOR */
+    .slider-box {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 12px;
+      padding: 18px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 18px;
+    }
+
+    .slider-group {
+      margin-bottom: 16px;
+    }
+
+    .slider-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .slider-label {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .slider-val-badge {
+      font-weight: 700;
+      color: var(--accent-emerald);
+      font-size: 14px;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    input[type=range] {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Savings Projection Result Box */
+    .projection-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(56, 189, 248, 0.08));
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .projection-amount {
+      font-size: 34px;
+      font-weight: 800;
+      color: #34d399;
+      letter-spacing: -0.5px;
+      margin: 4px 0 6px;
+    }
+
+    .projection-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .projection-milestones {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+      text-align: left;
+    }
+
+    .milestone-item {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .milestone-target {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .milestone-time {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    /* SVG Projection Curve */
+    .curve-svg {
+      width: 100%;
+      height: 90px;
+      margin-top: 12px;
+      overflow: visible;
+    }
+
+    /* SECTION 4: TRANSACTIONS TABLE */
+    .transactions-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 13px;
+      width: 240px;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      padding: 12px 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    tr.dup-flagged td {
+      background: rgba(244, 63, 94, 0.05);
+    }
+
+    .pill-tag {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-box {
+      background: #111827;
+      border: 1px solid var(--border-accent);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .form-input {
+      width: 100%;
+      background: #1f2937;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: white;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent-emerald);
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
+    }
+
+    .hub-link {
+      color: var(--accent-emerald);
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
+    .hub-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">💳</div>
+      <div class="brand-title">
+        <h1>FinOrbit Money Explorer</h1>
+        <p>Interactive Expense Category Breakdown, Duplicate Detection & Savings Engine</p>
+      </div>
+    </div>
+    <div class="header-controls">
+      <div class="badge">
+        <span>● Live Financial Simulator</span>
+      </div>
+      <a href="index.html" class="btn">← Back to Hub</a>
+      <button class="btn btn-primary" onclick="openAddModal()">+ Add Expense</button>
+    </div>
+  </header>
+
+  <!-- Top KPI Row -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Monthly Outflow</div>
+      <div class="kpi-val" id="kpiTotalSpend">$2,642.50</div>
+      <div class="kpi-sub"><span class="text-rose">↑ $120.00</span> vs previous month</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Duplicates Flagged</div>
+      <div class="kpi-val text-amber" id="kpiDuplicateCount">3 items</div>
+      <div class="kpi-sub" id="kpiDuplicateSavings">Potential savings: $83.98</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Current Savings Rate</div>
+      <div class="kpi-val text-emerald" id="kpiSavingsRate">34.2%</div>
+      <div class="kpi-sub">Target: 30% baseline</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Projected 5-Yr Wealth</div>
+      <div class="kpi-val" id="kpiWealth5Yr">$42,850</div>
+      <div class="kpi-sub"><span class="text-emerald">Compounding @ 8% p.a.</span></div>
+    </div>
+  </div>
+
+  <!-- Main 2-Column Section -->
+  <div class="layout-grid">
+    
+    <!-- LEFT COLUMN: Spending by Category & Duplicates -->
+    <div class="col-left">
+
+      <!-- Panel 1: Spending by Category -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>📊 Spending by Category</span>
+          </div>
+          <span class="badge" id="categoryCountBadge">6 Categories</span>
+        </div>
+
+        <!-- Donut & Legend -->
+        <div class="chart-container">
+          <div class="donut-wrapper">
+            <svg class="donut-svg" width="180" height="180" viewBox="0 0 100 100" id="donutSvg">
+              <!-- Rendered via JS -->
+            </svg>
+            <div class="donut-center-text">
+              <div class="donut-center-amount" id="donutCenterAmount">$2,642</div>
+              <div class="donut-center-label">Total Spend</div>
+            </div>
+          </div>
+
+          <div class="category-legend" id="categoryLegendContainer">
+            <!-- Legend pills populated via JS -->
+          </div>
+        </div>
+
+        <!-- Budget vs Actual Progress Bars -->
+        <h4 style="font-size: 14px; margin-bottom: 12px; color: var(--text-muted); font-weight: 600;">Monthly Budget Caps</h4>
+        <div class="category-budget-bars" id="categoryBudgetBarsContainer">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Panel 2: Duplicates to Check -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span style="color: var(--accent-amber);">⚠️ Duplicate Charges to Check</span>
+          </div>
+          <span class="badge badge-amber" id="dupBadge">3 Flagged</span>
+        </div>
+
+        <div class="duplicates-banner">
+          <div class="duplicates-banner-icon">🔍</div>
+          <div class="duplicates-banner-text">
+            <h4>Algorithm Flagged Potential Double-Billing</h4>
+            <p>We found identical charges billed by the same vendor within a close time window. Review each item below to reclaim funds or verify legitimacy.</p>
+          </div>
+        </div>
+
+        <div class="duplicate-list" id="duplicateListContainer">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Interactive Savings Slider -->
+    <div class="col-right">
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>💡 Interactive Savings Slider</span>
+          </div>
+          <span class="badge" style="background: rgba(16,185,129,0.12); color: var(--accent-emerald);">What-If Engine</span>
+        </div>
+
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">
+          Adjust the sliders below to see how trimming small subscriptions and optimizing monthly savings exponentially multiplies your future wealth.
+        </p>
+
+        <!-- Sliders Box -->
+        <div class="slider-box">
+          <!-- Slider 1: Monthly Discretionary Cutback -->
+          <div class="slider-group">
+            <div class="slider-header">
+              <span class="slider-label">Monthly Discretionary Cutback:</span>
+              <span class="slider-val-badge" id="valDiscretionary">$80 /mo</span>
+            </div>
+            <input type="range" id="sliderDiscretionary" min="0" max="400" step="10" value="80" oninput="recalcSavings()">
+            <div style="display:flex; justify-content:space-between; font-size: 10px; color: var(--text-muted); margin-top: 3px;">
+              <span>$0</span>
+              <span>$200</span>
+              <span>$400/mo</span>
+            </div>
+          </div>
+
+          <!-- Slider 2: Base Monthly Investment -->
+          <div class="slider-group" style="margin-top: 14px;">
+            <div class="slider-header">
+              <span class="slider-label">Base Monthly Contribution:</span>
+              <span class="slider-val-badge" id="valBaseContribution">$450 /mo</span>
+            </div>
+            <input type="range" id="sliderBase" min="50" max="2000" step="50" value="450" oninput="recalcSavings()">
+            <div style="display:flex; justify-content:space-between; font-size: 10px; color: var(--text-muted); margin-top: 3px;">
+              <span>$50</span>
+              <span>$1,000</span>
+              <span>$2,000/mo</span>
+            </div>
+          </div>
+
+          <!-- Slider 3: Expected Annual Return % -->
+          <div class="slider-group" style="margin-top: 14px;">
+            <div class="slider-header">
+              <span class="slider-label">Expected Annual Return (APY):</span>
+              <span class="slider-val-badge" id="valReturnRate">8.0%</span>
+            </div>
+            <input type="range" id="sliderReturn" min="2" max="15" step="0.5" value="8" oninput="recalcSavings()">
+            <div style="display:flex; justify-content:space-between; font-size: 10px; color: var(--text-muted); margin-top: 3px;">
+              <span>2% (Bank)</span>
+              <span>8% (Index)</span>
+              <span>15% (Aggressive)</span>
+            </div>
+          </div>
+
+          <!-- Slider 4: Time Horizon -->
+          <div class="slider-group" style="margin-top: 14px;">
+            <div class="slider-header">
+              <span class="slider-label">Time Horizon:</span>
+              <span class="slider-val-badge" id="valYears">5 Years</span>
+            </div>
+            <input type="range" id="sliderYears" min="1" max="25" step="1" value="5" oninput="recalcSavings()">
+            <div style="display:flex; justify-content:space-between; font-size: 10px; color: var(--text-muted); margin-top: 3px;">
+              <span>1 Year</span>
+              <span>10 Years</span>
+              <span>25 Years</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Projection Result Card -->
+        <div class="projection-card">
+          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">
+            Projected Future Portfolio Value
+          </div>
+          <div class="projection-amount" id="projectedTotalWealth">$40,326</div>
+          <div class="projection-sub">
+            Total invested: <strong id="projPrincipal">$31,800</strong> • Interest gained: <strong id="projInterest" class="text-emerald">+$8,526</strong>
+          </div>
+
+          <!-- SVG Visual Growth Curve -->
+          <svg class="curve-svg" viewBox="0 0 300 80" id="growthCurveSvg">
+            <path id="curvePath" d="M 0,70 Q 150,55 300,10" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+            <circle id="curveDot" cx="300" cy="10" r="5" fill="#38bdf8"/>
+          </svg>
+
+          <!-- Milestone Timelines -->
+          <div class="projection-milestones">
+            <div class="milestone-item">
+              <div class="milestone-target">Emergency Fund ($5k)</div>
+              <div class="milestone-time" id="msEmergency">9 Mos</div>
+            </div>
+            <div class="milestone-item">
+              <div class="milestone-target">Tech Upgrade ($2.5k)</div>
+              <div class="milestone-time" id="msTech">5 Mos</div>
+            </div>
+            <div class="milestone-item">
+              <div class="milestone-target">Freedom Nest ($50k)</div>
+              <div class="milestone-time" id="msFreedom">5.8 Yrs</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- BOTTOM SECTION: TRANSACTION LEDGER -->
+  <div class="transactions-panel">
+    <div class="table-controls">
+      <div>
+        <h3 style="font-size: 18px; font-weight: 700;">Sample Transaction Ledger</h3>
+        <p style="font-size: 13px; color: var(--text-muted);">Simulated personal account activity with duplicate highlights</p>
+      </div>
+
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <input type="text" class="search-input" id="searchTransInput" placeholder="Filter merchant or category..." oninput="renderTransactionsTable()">
+        <select id="filterCategorySelect" class="search-input" style="width: 140px;" onchange="renderTransactionsTable()">
+          <option value="ALL">All Categories</option>
+          <option value="Housing">Housing</option>
+          <option value="Dining">Dining</option>
+          <option value="Groceries">Groceries</option>
+          <option value="Tech">Tech & Cloud</option>
+          <option value="Utilities">Utilities</option>
+          <option value="Transport">Transport</option>
+        </select>
+        <button class="btn btn-sm" onclick="exportCSV()">📥 Export CSV</button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Merchant / Description</th>
+            <th>Category</th>
+            <th>Status / Flag</th>
+            <th style="text-align: right;">Amount</th>
+          </tr>
+        </thead>
+        <tbody id="transactionsTbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add Expense Modal -->
+  <div class="modal-backdrop" id="addExpenseModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-size: 18px;">Add New Transaction</h3>
+        <button class="btn btn-sm" onclick="closeAddModal()">✕</button>
+      </div>
+      <form onsubmit="handleNewTransactionSubmit(event)">
+        <div class="form-group">
+          <label>Merchant / Name</label>
+          <input type="text" id="newMerchant" class="form-input" placeholder="e.g. AWS Cloud, Spotify, Supermarket" required>
+        </div>
+        <div class="form-group">
+          <label>Amount ($)</label>
+          <input type="number" id="newAmount" step="0.01" class="form-input" placeholder="29.99" required>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="newCategory" class="form-input">
+            <option value="Housing">Housing</option>
+            <option value="Dining">Dining</option>
+            <option value="Groceries">Groceries</option>
+            <option value="Tech">Tech & Cloud</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Transport">Transport</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="newDate" class="form-input" required>
+        </div>
+        <div style="display:flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn" onclick="closeAddModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>FinOrbit Money Explorer • Realistic Simulation Engine for Financial Well-Being • <a href="index.html" class="hub-link">Return to 3-in-1 Project Hub</a></p>
+  </footer>
+</div>
+
+<script>
+  /* ==========================================================================
+     1. SAMPLE DATA INITIALIZATION
+     ========================================================================== */
+  const CATEGORIES = {
+    Housing:    { color: "#38bdf8", budget: 1100 },
+    Dining:     { color: "#f59e0b", budget: 350 },
+    Groceries:  { color: "#10b981", budget: 450 },
+    Tech:       { color: "#a855f7", budget: 280 },
+    Utilities:  { color: "#6366f1", budget: 220 },
+    Transport:  { color: "#ec4899", budget: 180 }
+  };
+
+  const INITIAL_TRANSACTIONS = [
+    { id: 1, date: "2026-10-28", merchant: "Metro Apartment Rent", category: "Housing", amount: 1050.00, dupGroup: null },
+    { id: 2, date: "2026-10-27", merchant: "AWS Cloud Compute", category: "Tech", amount: 49.00, dupGroup: "dup-aws-49" },
+    { id: 3, date: "2026-10-26", merchant: "AWS Cloud Compute", category: "Tech", amount: 49.00, dupGroup: "dup-aws-49" }, // DUPLICATE 1
+    { id: 4, date: "2026-10-25", merchant: "Whole Foods Market", category: "Groceries", amount: 134.20, dupGroup: null },
+    { id: 5, date: "2026-10-24", merchant: "Spotify Family Plan", category: "Tech", amount: 16.99, dupGroup: "dup-spot-16" },
+    { id: 6, date: "2026-10-23", merchant: "Spotify Family Plan", category: "Tech", amount: 16.99, dupGroup: "dup-spot-16" }, // DUPLICATE 2
+    { id: 7, date: "2026-10-22", merchant: "Blue Star Electric Co", category: "Utilities", amount: 98.40, dupGroup: null },
+    { id: 8, date: "2026-10-20", merchant: "Trader Joe's", category: "Groceries", amount: 84.15, dupGroup: null },
+    { id: 9, date: "2026-10-19", merchant: "Uber Rides", category: "Transport", amount: 24.50, dupGroup: null },
+    { id: 10, date: "2026-10-18", merchant: "Sushi House", category: "Dining", amount: 62.00, dupGroup: null },
+    { id: 11, date: "2026-10-16", merchant: "DigitalOcean Server", category: "Tech", amount: 12.00, dupGroup: "dup-do-12" },
+    { id: 12, date: "2026-10-15", merchant: "DigitalOcean Server", category: "Tech", amount: 12.00, dupGroup: "dup-do-12" }, // DUPLICATE 3
+    { id: 13, date: "2026-10-14", merchant: "City Water & Sewer", category: "Utilities", amount: 45.00, dupGroup: null },
+    { id: 14, date: "2026-10-12", merchant: "Chipotle Mexican Grill", category: "Dining", amount: 18.75, dupGroup: null },
+    { id: 15, date: "2026-10-10", merchant: "Subway Pass Renewal", category: "Transport", amount: 75.00, dupGroup: null },
+    { id: 16, date: "2026-10-08", merchant: "Target Household Items", category: "Groceries", amount: 56.80, dupGroup: null }
+  ];
+
+  let transactions = JSON.parse(localStorage.getItem('finorbit_transactions')) || INITIAL_TRANSACTIONS;
+  let resolvedDuplicates = new Set(JSON.parse(localStorage.getItem('finorbit_resolved_dups') || '[]'));
+
+  /* ==========================================================================
+     2. DUPLICATE CHECKER LOGIC
+     ========================================================================== */
+  function detectDuplicates() {
+    // Returns grouped potential duplicate transaction pairs
+    const dupMap = {};
+    transactions.forEach(t => {
+      if (!t.dupGroup) return;
+      if (!dupMap[t.dupGroup]) {
+        dupMap[t.dupGroup] = [];
+      }
+      dupMap[t.dupGroup].push(t);
+    });
+
+    const flaggedGroups = [];
+    for (const [key, items] of Object.entries(dupMap)) {
+      if (items.length >= 2) {
+        flaggedGroups.push({
+          groupKey: key,
+          merchant: items[0].merchant,
+          amount: items[0].amount,
+          items: items,
+          isResolved: resolvedDuplicates.has(key)
+        });
+      }
+    }
+    return flaggedGroups;
+  }
+
+  function renderDuplicates() {
+    const listEl = document.getElementById('duplicateListContainer');
+    listEl.innerHTML = '';
+
+    const duplicates = detectDuplicates();
+    const unresolved = duplicates.filter(d => !d.isResolved);
+    const totalPotentialSavings = unresolved.reduce((acc, curr) => acc + curr.amount, 0);
+
+    document.getElementById('kpiDuplicateCount').innerText = `${unresolved.length} items`;
+    document.getElementById('kpiDuplicateSavings').innerText = `Potential savings: $${totalPotentialSavings.toFixed(2)}`;
+    document.getElementById('dupBadge').innerText = `${unresolved.length} Flagged`;
+
+    if (duplicates.length === 0 || unresolved.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align: center; padding: 24px; color: var(--text-muted); background: rgba(16,185,129,0.05); border-radius: 12px; border: 1px dashed rgba(16,185,129,0.3);">
+          <span style="font-size: 28px;">🎉</span>
+          <p style="font-weight: 600; color: #34d399; margin-top: 6px;">Zero Duplicate Charges Found</p>
+          <p style="font-size: 12px;">All recent vendor transactions are verified and reconciled.</p>
+        </div>
+      `;
+      return;
+    }
+
+    duplicates.forEach(dup => {
+      const card = document.createElement('div');
+      card.className = `duplicate-card ${dup.isResolved ? 'resolved' : ''}`;
+      
+      const datesStr = dup.items.map(i => i.date).join(" & ");
+
+      card.innerHTML = `
+        <div class="duplicate-details">
+          <div class="duplicate-merchant">
+            <span>⚠️</span>
+            <span>${escapeHtml(dup.merchant)}</span>
+            <span class="pill-tag" style="background: rgba(244,63,94,0.15); color: #fda4af;">Duplicate Alert</span>
+          </div>
+          <div class="duplicate-meta">
+            Billed twice on ${datesStr} • Same amount
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div class="duplicate-amount">-$${dup.amount.toFixed(2)}</div>
+          <div class="duplicate-actions">
+            ${dup.isResolved ? 
+              `<span class="badge" style="background:rgba(16,185,129,0.15); color:#6ee7b7;">✓ Resolved</span>` : 
+              `<button class="btn btn-sm btn-primary" onclick="reclaimDuplicate('${dup.groupKey}')">Refund / Remove</button>
+               <button class="btn btn-sm" onclick="dismissDuplicate('${dup.groupKey}')">Keep Both</button>`
+            }
+          </div>
+        </div>
+      `;
+      listEl.appendChild(card);
+    });
+  }
+
+  function reclaimDuplicate(groupKey) {
+    // Remove the secondary duplicate item
+    const idxToRemove = transactions.findLastIndex(t => t.dupGroup === groupKey);
+    if (idxToRemove !== -1) {
+      transactions.splice(idxToRemove, 1);
+      resolvedDuplicates.add(groupKey);
+      saveState();
+      alert("Duplicate transaction purged! Your refund has been credited.");
+    }
+  }
+
+  function dismissDuplicate(groupKey) {
+    resolvedDuplicates.add(groupKey);
+    saveState();
+  }
+
+  /* ==========================================================================
+     3. SPENDING BY CATEGORY & DONUT CHART
+     ========================================================================== */
+  function renderSpendingBreakdown() {
+    const totals = {};
+    let totalSpend = 0;
+
+    Object.keys(CATEGORIES).forEach(c => totals[c] = 0);
+
+    transactions.forEach(t => {
+      if (totals[t.category] !== undefined) {
+        totals[t.category] += t.amount;
+        totalSpend += t.amount;
+      }
+    });
+
+    // Update KPI & Center Donut
+    document.getElementById('kpiTotalSpend').innerText = `$${totalSpend.toFixed(2)}`;
+    document.getElementById('donutCenterAmount').innerText = `$${Math.round(totalSpend)}`;
+
+    // Build SVG Donut Segments
+    const svg = document.getElementById('donutSvg');
+    svg.innerHTML = '';
+    const radius = 40;
+    const circumference = 2 * Math.PI * radius; // ~251.32
+    let strokeOffset = 0;
+
+    const legendContainer = document.getElementById('categoryLegendContainer');
+    legendContainer.innerHTML = '';
+
+    const budgetBarsContainer = document.getElementById('categoryBudgetBarsContainer');
+    budgetBarsContainer.innerHTML = '';
+
+    Object.entries(totals).forEach(([cat, amount]) => {
+      const pct = totalSpend > 0 ? (amount / totalSpend) : 0;
+      const strokeDash = pct * circumference;
+      const color = CATEGORIES[cat].color;
+
+      // Donut slice
+      if (pct > 0) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", "50");
+        circle.setAttribute("cy", "50");
+        circle.setAttribute("r", radius);
+        circle.setAttribute("fill", "transparent");
+        circle.setAttribute("stroke", color);
+        circle.setAttribute("stroke-width", "13");
+        circle.setAttribute("stroke-dasharray", `${strokeDash} ${circumference - strokeDash}`);
+        circle.setAttribute("stroke-dashoffset", -strokeOffset);
+        svg.appendChild(circle);
+        strokeOffset += strokeDash;
+      }
+
+      // Legend Item
+      const leg = document.createElement('div');
+      leg.className = 'legend-item';
+      leg.innerHTML = `
+        <div class="legend-color-dot" style="background: ${color};"></div>
+        <div class="legend-info">
+          <span>${cat}</span>
+          <strong>${Math.round(pct * 100)}%</strong>
+        </div>
+      `;
+      legendContainer.appendChild(leg);
+
+      // Budget Progress Bar
+      const budget = CATEGORIES[cat].budget;
+      const budgetPct = Math.min(Math.round((amount / budget) * 100), 120);
+      const isOver = amount > budget;
+
+      const bar = document.createElement('div');
+      bar.className = 'cat-bar-item';
+      bar.innerHTML = `
+        <div class="cat-bar-labels">
+          <span>${cat}</span>
+          <span><strong>$${amount.toFixed(0)}</strong> / $${budget} <small style="color:${isOver ? 'var(--accent-rose)' : 'var(--text-muted)'}">(${budgetPct}%)</small></span>
+        </div>
+        <div class="cat-bar-track">
+          <div class="cat-bar-fill" style="width: ${budgetPct}%; background: ${isOver ? 'var(--accent-rose)' : color};"></div>
+        </div>
+      `;
+      budgetBarsContainer.appendChild(bar);
+    });
+  }
+
+  /* ==========================================================================
+     4. INTERACTIVE SAVINGS SLIDER & PROJECTION ENGINE
+     ========================================================================== */
+  function recalcSavings() {
+    const cutback = parseFloat(document.getElementById('sliderDiscretionary').value);
+    const baseContrib = parseFloat(document.getElementById('sliderBase').value);
+    const returnRate = parseFloat(document.getElementById('sliderReturn').value) / 100;
+    const years = parseFloat(document.getElementById('sliderYears').value);
+
+    // Update slider badges
+    document.getElementById('valDiscretionary').innerText = `$${cutback} /mo`;
+    document.getElementById('valBaseContribution').innerText = `$${baseContrib} /mo`;
+    document.getElementById('valReturnRate').innerText = `${(returnRate * 100).toFixed(1)}%`;
+    document.getElementById('valYears').innerText = `${years} ${years === 1 ? 'Year' : 'Years'}`;
+
+    // Total monthly invested
+    const totalMonthly = cutback + baseContrib;
+    const months = years * 12;
+    const monthlyRate = returnRate / 12;
+
+    // Future Value formula: FV = PMT * [((1 + r)^n - 1) / r]
+    let futureValue = 0;
+    if (monthlyRate > 0) {
+      futureValue = totalMonthly * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
+    } else {
+      futureValue = totalMonthly * months;
+    }
+
+    const principal = totalMonthly * months;
+    const interest = futureValue - principal;
+
+    // Display formatted
+    document.getElementById('projectedTotalWealth').innerText = `$${Math.round(futureValue).toLocaleString()}`;
+    document.getElementById('projPrincipal').innerText = `$${Math.round(principal).toLocaleString()}`;
+    document.getElementById('projInterest').innerText = `+$${Math.round(interest).toLocaleString()}`;
+
+    // Update 5-year KPI header value dynamically
+    const fv5Yr = totalMonthly * ((Math.pow(1 + 0.08 / 12, 60) - 1) / (0.08 / 12));
+    document.getElementById('kpiWealth5Yr').innerText = `$${Math.round(fv5Yr).toLocaleString()}`;
+
+    // Milestone calculations
+    calcMilestone('msEmergency', 5000, totalMonthly, monthlyRate);
+    calcMilestone('msTech', 2500, totalMonthly, monthlyRate);
+    calcMilestone('msFreedom', 50000, totalMonthly, monthlyRate);
+
+    // Animate SVG Curve
+    updateCurve(years, futureValue);
+  }
+
+  function calcMilestone(elemId, target, monthly, rate) {
+    if (monthly <= 0) {
+      document.getElementById(elemId).innerText = "∞";
+      return;
+    }
+    // n = ln( (FV * r / PMT) + 1 ) / ln(1 + r)
+    let months = 0;
+    if (rate > 0) {
+      const top = (target * rate / monthly) + 1;
+      if (top > 0) {
+        months = Math.log(top) / Math.log(1 + rate);
+      } else {
+        months = target / monthly;
+      }
+    } else {
+      months = target / monthly;
+    }
+
+    if (months < 12) {
+      document.getElementById(elemId).innerText = `${Math.ceil(months)} Mos`;
+    } else {
+      document.getElementById(elemId).innerText = `${(months / 12).toFixed(1)} Yrs`;
+    }
+  }
+
+  function updateCurve(years, fv) {
+    // Dynamically adjust SVG path steepness
+    const curve = document.getElementById('curvePath');
+    const dot = document.getElementById('curveDot');
+    const maxVal = 200000;
+    const normalizedY = Math.max(10, 70 - Math.min((fv / maxVal) * 60, 60));
+    
+    curve.setAttribute('d', `M 0,70 Q 150,${(70 + normalizedY) / 2} 300,${normalizedY}`);
+    dot.setAttribute('cy', normalizedY);
+  }
+
+  /* ==========================================================================
+     5. TRANSACTIONS TABLE & MODAL
+     ========================================================================== */
+  function renderTransactionsTable() {
+    const tbody = document.getElementById('transactionsTbody');
+    tbody.innerHTML = '';
+
+    const query = document.getElementById('searchTransInput').value.toLowerCase();
+    const catFilter = document.getElementById('filterCategorySelect').value;
+
+    const filtered = transactions.filter(t => {
+      const matchQ = t.merchant.toLowerCase().includes(query) || t.category.toLowerCase().includes(query);
+      const matchCat = (catFilter === 'ALL' || t.category === catFilter);
+      return matchQ && matchCat;
+    });
+
+    filtered.forEach(t => {
+      const tr = document.createElement('tr');
+      const isDup = t.dupGroup && !resolvedDuplicates.has(t.dupGroup);
+      if (isDup) tr.classList.add('dup-flagged');
+
+      tr.innerHTML = `
+        <td style="color: var(--text-muted); font-variant-numeric: tabular-nums;">${t.date}</td>
+        <td>
+          <strong>${escapeHtml(t.merchant)}</strong>
+        </td>
+        <td>
+          <span class="pill-tag" style="background: ${CATEGORIES[t.category]?.color || '#fff'}22; color: ${CATEGORIES[t.category]?.color || '#fff'};">
+            ${escapeHtml(t.category)}
+          </span>
+        </td>
+        <td>
+          ${isDup ? 
+            `<span class="pill-tag" style="background: rgba(244,63,94,0.2); color: #fda4af;">⚠️ Flagged Duplicate</span>` : 
+            `<span style="color: var(--text-muted); font-size: 11px;">Verified</span>`
+          }
+        </td>
+        <td style="text-align: right; font-weight: 700; font-variant-numeric: tabular-nums;">
+          -$${t.amount.toFixed(2)}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function openAddModal() {
+    document.getElementById('newDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('addExpenseModal').style.display = 'flex';
+  }
+
+  function closeAddModal() {
+    document.getElementById('addExpenseModal').style.display = 'none';
+  }
+
+  function handleNewTransactionSubmit(e) {
+    e.preventDefault();
+    const merchant = document.getElementById('newMerchant').value.trim();
+    const amount = parseFloat(document.getElementById('newAmount').value);
+    const category = document.getElementById('newCategory').value;
+    const date = document.getElementById('newDate').value;
+
+    if (!merchant || isNaN(amount) || amount <= 0) return;
+
+    // Check if duplicate of recent identical amount
+    const duplicateMatch = transactions.find(t => 
+      t.merchant.toLowerCase() === merchant.toLowerCase() && 
+      Math.abs(t.amount - amount) < 0.01
+    );
+
+    const dupKey = duplicateMatch ? (duplicateMatch.dupGroup || `dup-${Date.now()}`) : null;
+    if (duplicateMatch && !duplicateMatch.dupGroup) {
+      duplicateMatch.dupGroup = dupKey;
+    }
+
+    transactions.unshift({
+      id: Date.now(),
+      date,
+      merchant,
+      category,
+      amount,
+      dupGroup: dupKey
+    });
+
+    closeAddModal();
+    saveState();
+    alert("Transaction logged successfully!");
+  }
+
+  function exportCSV() {
+    let csv = "Date,Merchant,Category,Amount\n";
+    transactions.forEach(t => {
+      csv += `"${t.date}","${t.merchant}","${t.category}",${t.amount}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'finorbit_transactions.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function saveState() {
+    localStorage.setItem('finorbit_transactions', JSON.stringify(transactions));
+    localStorage.setItem('finorbit_resolved_dups', JSON.stringify([...resolvedDuplicates]));
+    renderDuplicates();
+    renderSpendingBreakdown();
+    renderTransactionsTable();
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // Boot
+  renderDuplicates();
+  renderSpendingBreakdown();
+  recalcSavings();
+  renderTransactionsTable();
+</script>
+
+</body>
+</html>
+
